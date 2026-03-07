@@ -78,19 +78,20 @@
 |------|------|------|
 | Backend | Spring Boot, Spring Web, Spring Data JPA | 서울 버스 API 호출, 데이터 가공, 기후동행 필터링 |
 | Frontend | React | 지도 표시, 정류장/버스 UI |
-| Map | Kakao Map API | 지도 렌더링, 마커, 위치 |
+| Map | T-Map API (SK) | 지도 렌더링, 마커, 위치, 대중교통 경로 |
 | Data | 서울 열린데이터광장 API | 정류장, 도착정보, 노선 정보 |
 
 ---
 
 ## 5. 외부 API 및 키 발급
 
-### 5-1. Kakao Map API
+### 5-1. T-Map API (SK Open API)
 
-- **등록 위치**: https://developers.kakao.com
-- **발급 키**: JavaScript 앱 키 (프론트엔드용)
-- **사용 기능**: 지도 렌더링, 마커, 현재 위치, 지오코딩
+- **등록 위치**: https://openapi.sk.com
+- **발급 키**: App Key (프론트엔드용)
+- **사용 기능**: 지도 렌더링, 마커, 현재 위치, 역지오코딩, 대중교통 경로 탐색
 - **주의**: 도메인 등록 필요 (개발 시 `localhost` 등록)
+- **참고**: 대중교통 경로 API는 Phase 3 (D-03) 구현 시 활용 가능
 
 ### 5-2. 서울 열린데이터광장 (공공 버스 API)
 

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: climate-bus-map-postgres
+    ports:
+      - "5442:5432"
+    environment:
+      POSTGRES_DB: climate_bus_map
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - climate_bus_map_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  climate_bus_map_data:

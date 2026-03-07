@@ -1,14 +1,14 @@
-package com.stw.climatebusmapbe.external.busapi.dto;
+package com.stw.climatebusmapbe.station.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class NearbyStationDto {
+public class StationDto {
     private String stationId;
     private String stationName;
     private String arsId;
-    private double lat;   // WGS84 위도
-    private double lng;   // WGS84 경도
+    private double lat;
+    private double lng;
 }

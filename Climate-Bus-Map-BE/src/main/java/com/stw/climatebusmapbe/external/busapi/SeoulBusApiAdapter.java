@@ -1,12 +1,23 @@
 package com.stw.climatebusmapbe.external.busapi;
 
+import com.stw.climatebusmapbe.common.exception.BusApiException;
 import com.stw.climatebusmapbe.external.busapi.dto.BusArrivalDto;
-import com.stw.climatebusmapbe.external.busapi.dto.NearbyStationDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -15,35 +26,78 @@ public class SeoulBusApiAdapter implements BusApiPort {
 
     private final RestClient restClient;
     private final String apiKey;
+    private final String baseUrl;
 
     public SeoulBusApiAdapter(
             RestClient.Builder builder,
             @Value("${seoul.bus.api.key}") String apiKey,
             @Value("${seoul.bus.api.base-url}") String baseUrl
     ) {
-        this.restClient = builder.baseUrl(baseUrl).build();
+        this.restClient = builder.build();
         this.apiKey = apiKey;
+        this.baseUrl = baseUrl;
     }
 
     @Override
-    public String testConnection(String busRouteId) {
-        log.info("서울 버스 API 연결 테스트: busRouteId={}", busRouteId);
-        return restClient.get()
-                .uri("/busRouteInfo/getBusRouteInfo?serviceKey={key}&busRouteId={id}&resultType=json",
-                        apiKey, busRouteId)
-                .retrieve()
-                .body(String.class);
-    }
-
-    @Override
-    public List<NearbyStationDto> getNearbyStations(double tmX, double tmY, int radius) {
-        // Phase 2에서 구현
-        throw new UnsupportedOperationException("Phase 2에서 구현 예정");
-    }
-
-    @Override
+    @Cacheable(value = "arrivals", key = "#stationId")
     public List<BusArrivalDto> getArrivals(String stationId) {
-        // Phase 2에서 구현
-        throw new UnsupportedOperationException("Phase 2에서 구현 예정");
+        log.info("도착 정보 조회: stationId={}", stationId);
+
+        URI uri = UriComponentsBuilder.fromUriString(baseUrl + "/arrive/getLowArrInfoByStId")
+                .queryParam("serviceKey", apiKey)
+                .queryParam("stId", stationId)
+                .build(true).toUri();
+        log.info("요청 URL: {}", uri);
+
+        String xml = restClient.get().uri(uri).retrieve().body(String.class);
+        log.debug("도착정보 XML 응답: {}", xml);
+        return parseArrivals(xml);
+    }
+
+    private List<BusArrivalDto> parseArrivals(String xml) {
+        try {
+            Document doc = parse(xml);
+
+            String headerCd = getTagValue("headerCd", doc);
+            if (!"0".equals(headerCd)) {
+                throw new BusApiException(getTagValue("headerMsg", doc));
+            }
+
+            NodeList items = doc.getElementsByTagName("itemList");
+            List<BusArrivalDto> result = new ArrayList<>();
+            for (int i = 0; i < items.getLength(); i++) {
+                Element item = (Element) items.item(i);
+                result.add(new BusArrivalDto(
+                        getTagValue("busRouteId", item),
+                        getTagValue("rtNm", item),
+                        toInt(getTagValue("exps1", item)),
+                        toInt(getTagValue("exps2", item))
+                ));
+            }
+            return result;
+        } catch (BusApiException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BusApiException("도착정보 XML 파싱 실패: " + e.getMessage());
+        }
+    }
+
+    private Document parse(String xml) throws Exception {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        return builder.parse(new InputSource(new StringReader(xml)));
+    }
+
+    private String getTagValue(String tag, Document doc) {
+        NodeList nodes = doc.getElementsByTagName(tag);
+        return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
+    }
+
+    private String getTagValue(String tag, Element element) {
+        NodeList nodes = element.getElementsByTagName(tag);
+        return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
+    }
+
+    private int toInt(String value) {
+        try { return Integer.parseInt(value); } catch (Exception e) { return 0; }
     }
 }
