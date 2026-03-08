@@ -1,8 +1,12 @@
 {
-  "sessionCount": 3,
+  "sessionCount": 8,
   "lastSession": {
-    "startedAt": "2026-03-04T07:47:05.031Z",
+    "startedAt": "2026-03-08T05:07:10.662Z",
     "platform": "claude",
-    "level": "Dynamic"
-  }
+    "level": "Enterprise"
+  },
+  "currentFeature": "phase3",
+  "currentPhase": "archived",
+  "reportVersion": "1.2",
+  "matchRate": 97
 }

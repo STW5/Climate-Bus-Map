@@ -46,8 +46,11 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>기후동행 버스 지도</h1>
-        {isFallback && <span className="fallback-notice">위치 사용 불가 — 서울시청 기준</span>}
+        <div className="header-icon">🚌</div>
+        <div className="header-text">
+          <h1>기후동행 버스 지도</h1>
+          {isFallback && <p className="fallback-notice">위치 사용 불가 — 서울시청 기준</p>}
+        </div>
       </header>
       <div className="map-wrapper">
         {position ? (
@@ -57,7 +60,10 @@ export default function App() {
             onStationSelect={handleStationSelect}
           />
         ) : (
-          <div className="loading-screen">위치 정보를 가져오는 중...</div>
+          <div className="loading-screen">
+            <div className="loading-spinner" />
+            위치 정보를 가져오는 중...
+          </div>
         )}
         {stationsError && (
           <div className="stations-error">정류장 로드 실패: {stationsError}</div>
