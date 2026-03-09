@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface BusApiPort {
 
-    // 정류장 도착 버스 정보 조회 (getLowArrInfoByStIdList - 저상버스)
-    // 등록된 API: getLowArrInfoByStIdList (stId 파라미터)
+    // 정류장 도착 버스 정보 조회 (getLowArrInfoByStId - 저상버스)
     List<BusArrivalDto> getArrivals(String stationId);
+
+    // 좌표 기반 근접 정류소 목록 조회 (getStationByPos)
+    List<NearbyStationDto> getNearbyStations(double lng, double lat, int radius);
 }

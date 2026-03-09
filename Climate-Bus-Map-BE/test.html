@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>기후동행 버스 지도</title>
+  <script src="https://apis.openapi.sk.com/tmap/js?version=1&appKey=mUIPLi17iw20TICBoemvj5BYm60Yn5mU3IuPf8ce"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+
+    html, body { width: 100%; height: 100%; }
+    #map { width: 100%; height: 100%; position: relative; }
+
+    #panel {
+      position: fixed; top: 16px; right: 16px;
+      width: 320px; max-height: 80vh;
+      background: white; border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      overflow-y: auto; z-index: 1000;
+      display: none;
+    }
+    #panel-header {
+      padding: 16px; border-bottom: 1px solid #eee;
+      font-weight: 700; font-size: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    #panel-close {
+      cursor: pointer; font-size: 20px; color: #999;
+      background: none; border: none;
+    }
+    #panel-body { padding: 12px; }
+
+    .arrival-item {
+      padding: 10px 12px; margin-bottom: 8px;
+      border-radius: 8px; background: #f9f9f9;
+      border-left: 4px solid #ddd;
+    }
+    .arrival-item.climate { border-left-color: #2ecc71; }
+    .route-no { font-weight: 700; font-size: 16px; }
+    .arrival-time { font-size: 13px; color: #666; margin-top: 4px; }
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 12px; margin-top: 6px;
+    }
+    .badge.climate { background: #d5f5e3; color: #1a8a4a; }
+    .badge.normal { background: #f0f0f0; color: #888; }
+
+    #status {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.7); color: white;
+      padding: 8px 20px; border-radius: 20px; font-size: 14px;
+      z-index: 1000; display: none;
+    }
+
+    #locate-btn {
+      position: fixed; bottom: 24px; right: 16px;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: white; border: none; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      font-size: 20px; z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="panel">
+  <div id="panel-header">
+    <span id="panel-title">도착 정보</span>
+    <button id="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div id="panel-body"></div>
+</div>
+
+<div id="status"></div>
+<button id="locate-btn" onclick="locateMe()" title="내 위치">📍</button>
+
+<script>
+  const API_BASE = 'http://localhost:8080/api/v1';
+  let map, markers = [];
+
+  // 지도 초기화
+  function initMap(lat, lng) {
+    map = new Tmap.Map({
+      div: 'map',
+      width: window.innerWidth + 'px',
+      height: window.innerHeight + 'px',
+      zoom: 16,
+      lat: lat,
+      lng: lng
+    });
+
+    // 내 위치 마커
+    new Tmap.Marker({
+      position: {lat: lat, lng: lng},
+      iconHTML: '<div style="width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+      map: map
+    });
+
+    loadNearbyStations(lat, lng);
+  }
+
+  // 인근 정류장 조회
+  async function loadNearbyStations(lat, lng) {
+    showStatus('정류장 조회 중...');
+    try {
+      const res = await fetch(`${API_BASE}/stations/nearby?lat=${lat}&lng=${lng}&radius=500`);
+      const json = await res.json();
+
+      if (!json.success) { showStatus('정류장 조회 실패'); return; }
+
+      clearMarkers();
+      const stations = json.data.stations;
+      showStatus(`정류장 ${stations.length}개 발견`);
+
+      stations.forEach(s => addStationMarker(s));
+
+      setTimeout(() => hideStatus(), 2000);
+    } catch (e) {
+      showStatus('백엔드 서버에 연결할 수 없어요 (localhost:8080)');
+    }
+  }
+
+  // 정류장 마커 추가
+  function addStationMarker(station) {
+    const marker = new Tmap.Marker({
+      position: {lat: station.lat, lng: station.lng},
+      iconHTML: `<div style="
+        background:#fff;border:2px solid #4b5563;border-radius:6px;
+        padding:2px 6px;font-size:11px;font-weight:600;
+        white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);
+        cursor:pointer;
+      ">${station.stationName}</div>`,
+      map: map
+    });
+
+    marker.addListener('click', () => loadArrivals(station));
+    markers.push(marker);
+  }
+
+  // 도착 정보 조회
+  async function loadArrivals(station) {
+    document.getElementById('panel').style.display = 'block';
+    document.getElementById('panel-title').textContent = station.stationName;
+    document.getElementById('panel-body').innerHTML = '<p style="color:#999;padding:8px">로딩 중...</p>';
+
+    try {
+      const res = await fetch(`${API_BASE}/stations/${station.stationId}/arrivals`);
+      const json = await res.json();
+
+      if (!json.success) {
+        document.getElementById('panel-body').innerHTML = '<p style="color:#e74c3c;padding:8px">조회 실패</p>';
+        return;
+      }
+
+      const arrivals = json.data.arrivals;
+      if (arrivals.length === 0) {
+        document.getElementById('panel-body').innerHTML = '<p style="color:#999;padding:8px">도착 예정 버스가 없어요</p>';
+        return;
+      }
+
+      document.getElementById('panel-body').innerHTML = arrivals.map(a => `
+        <div class="arrival-item ${a.climateEligible ? 'climate' : ''}">
+          <div class="route-no">${a.routeNo}번</div>
+          <div class="arrival-time">
+            1번째: ${formatSec(a.arrivalSec1)} &nbsp;|&nbsp; 2번째: ${formatSec(a.arrivalSec2)}
+          </div>
+          <span class="badge ${a.climateEligible ? 'climate' : 'normal'}">
+            ${a.climateEligible ? '🟢 기후동행 가능' : '기후동행 불가'}
+          </span>
+        </div>
+      `).join('');
+    } catch (e) {
+      document.getElementById('panel-body').innerHTML = '<p style="color:#e74c3c;padding:8px">서버 오류</p>';
+    }
+  }
+
+  function formatSec(sec) {
+    if (!sec || sec <= 0) return '곧 도착';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m > 0 ? `${m}분 ${s}초` : `${s}초`;
+  }
+
+  function closePanel() {
+    document.getElementById('panel').style.display = 'none';
+  }
+
+  function clearMarkers() {
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+  }
+
+  function locateMe() {
+    showStatus('위치 확인 중...');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const { latitude, longitude } = pos.coords;
+        map.setCenter({lat: latitude, lng: longitude});
+        loadNearbyStations(latitude, longitude);
+      },
+      () => showStatus('위치 권한이 필요해요')
+    );
+  }
+
+  function showStatus(msg) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideStatus() {
+    document.getElementById('status').style.display = 'none';
+  }
+
+  // 시작: 현재 위치 기반
+  if (navigator.geolocation) {
+    showStatus('위치 확인 중...');
+    navigator.geolocation.getCurrentPosition(
+      pos => initMap(pos.coords.latitude, pos.coords.longitude),
+      ()  => initMap(37.5670, 126.9782)  // 실패 시 광화문
+    );
+  } else {
+    initMap(37.5670, 126.9782);
+  }
+</script>
+</body>
+</html>

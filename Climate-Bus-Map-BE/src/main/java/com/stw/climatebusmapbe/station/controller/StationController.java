@@ -1,6 +1,7 @@
 package com.stw.climatebusmapbe.station.controller;
 
 import com.stw.climatebusmapbe.common.ApiResponse;
+import com.stw.climatebusmapbe.station.dto.ClimateRoutesResponse;
 import com.stw.climatebusmapbe.station.dto.NearbyStationsResponse;
 import com.stw.climatebusmapbe.station.service.StationService;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,14 @@ public class StationController {
             @RequestParam(defaultValue = "500") int radius
     ) {
         return ApiResponse.ok(stationService.getNearbyStations(lat, lng, radius));
+    }
+
+    @GetMapping("/nearby/climate-routes")
+    public ApiResponse<ClimateRoutesResponse> getNearbyClimateRoutes(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "500") int radius
+    ) {
+        return ApiResponse.ok(stationService.getNearbyClimateRoutes(lat, lng, radius));
     }
 }
