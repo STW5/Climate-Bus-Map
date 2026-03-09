@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import MapView from './components/MapView';
 import ArrivalPanel from './components/ArrivalPanel';
+import FilterToggle from './components/FilterToggle';
+import ClimateRoutesPanel from './components/ClimateRoutesPanel';
 import { useGeolocation } from './hooks/useGeolocation';
-import { fetchNearbyStations, fetchArrivals } from './api/busApi';
+import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes } from './api/busApi';
 import './App.css';
 
 export default function App() {
@@ -14,12 +16,32 @@ export default function App() {
   const [arrivalLoading, setArrivalLoading] = useState(false);
   const [arrivalError, setArrivalError] = useState(null);
 
+  // D-01: 기후동행 필터
+  const [filterActive, setFilterActive] = useState(false);
+  // stationId → arrivals 캐시 (필터 판단용)
+  const [arrivalCache, setArrivalCache] = useState({});
+
+  // D-02: 주변 기후동행 노선 패널
+  const [climateRoutes, setClimateRoutes] = useState([]);
+  const [climateLoading, setClimateLoading] = useState(false);
+  const [climateError, setClimateError] = useState(null);
+
   useEffect(() => {
     if (!position) return;
     setStationsError(null);
     fetchNearbyStations(position.lat, position.lng)
       .then(setStations)
       .catch((e) => setStationsError(e.message));
+  }, [position]);
+
+  useEffect(() => {
+    if (!position) return;
+    setClimateLoading(true);
+    setClimateError(null);
+    fetchNearbyClimateRoutes(position.lat, position.lng)
+      .then((data) => setClimateRoutes(data.routes || []))
+      .catch((e) => setClimateError(e.message))
+      .finally(() => setClimateLoading(false));
   }, [position]);
 
   const handleStationSelect = useCallback(async (station) => {
@@ -30,6 +52,7 @@ export default function App() {
     try {
       const data = await fetchArrivals(station.stationId);
       setArrivals(data);
+      setArrivalCache((prev) => ({ ...prev, [station.stationId]: data }));
     } catch (e) {
       setArrivalError(e.message);
     } finally {
@@ -43,6 +66,16 @@ export default function App() {
     setArrivalError(null);
   }, []);
 
+  // D-01: 필터 적용 — 도착정보 캐시에서 기후동행 가능 버스가 있는 정류소만 표시
+  const displayedStations = useMemo(() => {
+    if (!filterActive) return stations;
+    return stations.filter((s) => {
+      const cached = arrivalCache[s.stationId];
+      if (!cached) return true; // 미조회 정류소는 일단 표시
+      return cached.some((a) => a.climateEligible);
+    });
+  }, [filterActive, stations, arrivalCache]);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -51,12 +84,13 @@ export default function App() {
           <h1>기후동행 버스 지도</h1>
           {isFallback && <p className="fallback-notice">위치 사용 불가 — 서울시청 기준</p>}
         </div>
+        <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
       </header>
       <div className="map-wrapper">
         {position ? (
           <MapView
             center={position}
-            stations={stations}
+            stations={displayedStations}
             onStationSelect={handleStationSelect}
           />
         ) : (
@@ -68,6 +102,11 @@ export default function App() {
         {stationsError && (
           <div className="stations-error">정류장 로드 실패: {stationsError}</div>
         )}
+        <ClimateRoutesPanel
+          routes={climateRoutes}
+          loading={climateLoading}
+          error={climateError}
+        />
         <ArrivalPanel
           station={selectedStation}
           arrivals={arrivals}
