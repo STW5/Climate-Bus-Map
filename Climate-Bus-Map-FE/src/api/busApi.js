@@ -24,6 +24,36 @@ export async function fetchNearbyClimateRoutes(lat, lng, radius = 500) {
   return json.data;
 }
 
+/**
+ * 경로의 첫 번째 버스 구간 탑승 대기 시간 조회
+ * @param {object[]} subPaths - ODsay subPath 배열
+ * @returns {Promise<{arrivalSec: number, routeNo: string}|null>}
+ */
+export async function fetchBoardingTime(subPaths) {
+  const firstBus = subPaths.find(sp => sp.trafficType === 2);
+  if (!firstBus) return null;
+
+  const stations = firstBus.passStopList?.stations ?? [];
+  const routeNo = firstBus.lane?.[0]?.busNo;
+  if (!stations.length || !routeNo) return null;
+
+  const lat = parseFloat(stations[0].y);
+  const lng = parseFloat(stations[0].x);
+  if (!lat || !lng) return null;
+
+  try {
+    const nearby = await fetchNearbyStations(lat, lng, 150);
+    for (const station of nearby.slice(0, 3)) {
+      const arrivals = await fetchArrivals(station.stationId);
+      const match = arrivals.find(a => String(a.routeNo) === String(routeNo));
+      if (match) return { arrivalSec: match.arrivalSec1, routeNo };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchClimateEligibleRouteIds() {
   const res = await fetch(`${BASE_URL}/api/v1/routes/climate-eligible`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
