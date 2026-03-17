@@ -1,12 +1,11 @@
 import { isPathFullyClimate, getSubPathClimateFlags } from '../utils/climateChecker';
 
 const TRAFFIC_ICON = { 1: '🚇', 2: '🚌', 3: '🚶' };
-const TRAFFIC_LABEL = { 1: '지하철', 2: '버스', 3: '도보' };
 
-function RouteCard({ path, climateRouteIds, onClick, selected }) {
+function RouteCard({ path, onClick, selected }) {
   const subPaths = path.subPath ?? [];
-  const fullyClimate = isPathFullyClimate(subPaths, climateRouteIds);
-  const flagged = getSubPathClimateFlags(subPaths, climateRouteIds);
+  const fullyClimate = isPathFullyClimate(subPaths);
+  const flagged = getSubPathClimateFlags(subPaths);
   const mins = path.info?.totalTime ?? '?';
 
   return (
@@ -23,12 +22,12 @@ function RouteCard({ path, climateRouteIds, onClick, selected }) {
         )}
       </div>
       <div className="route-card__segments">
-        {flagged.filter((p) => p.trafficType !== 3 || flagged.filter(x => x.trafficType === 3).length <= 1).map((p, i) => {
+        {flagged.filter((p) => p.trafficType !== 3).map((p, i) => {
           const name = p.trafficType === 2
             ? (p.lane?.[0]?.busNo ?? '버스')
-            : p.trafficType === 1
-            ? (p.lane?.[0]?.subwayCode ? `${p.lane[0].subwayCode}호선` : '지하철')
-            : '도보';
+            : p.lane?.[0]?.subwayCode
+            ? `${p.lane[0].subwayCode}호선`
+            : '지하철';
           return (
             <span key={i} className={`route-segment${p.climateEligible ? '' : ' route-segment--ineligible'}`}>
               {TRAFFIC_ICON[p.trafficType]} {name}
@@ -40,7 +39,7 @@ function RouteCard({ path, climateRouteIds, onClick, selected }) {
   );
 }
 
-export default function RouteResultPanel({ paths, climateRouteIds, onSelectPath, selectedPath, onClose }) {
+export default function RouteResultPanel({ paths, onSelectPath, selectedPath, onClose }) {
   if (!paths || paths.length === 0) return null;
 
   return (
@@ -54,7 +53,6 @@ export default function RouteResultPanel({ paths, climateRouteIds, onSelectPath,
           <RouteCard
             key={i}
             path={path}
-            climateRouteIds={climateRouteIds}
             onClick={() => onSelectPath(path)}
             selected={selectedPath === path}
           />

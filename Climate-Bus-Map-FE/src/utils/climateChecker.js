@@ -1,41 +1,48 @@
+/**
+ * 노선번호 패턴으로 기후동행카드 사용 가능 여부 판단
+ * - 한글 포함      → 마을버스 ❌
+ * - M/G/A 시작    → 광역·경기버스 ❌
+ * - N + 숫자       → 심야버스 ✅
+ * - 숫자만         → 간선·지선·순환버스 ✅
+ */
+export function isClimateEligibleByRouteNo(routeNo) {
+  if (!routeNo) return false;
+  const no = String(routeNo).trim();
+  if (/[가-힣]/.test(no)) return false;
+  if (/^[MGA]/i.test(no)) return false;
+  if (/^N\d+$/i.test(no)) return true;
+  if (/^\d+$/.test(no)) return true;
+  return false;
+}
+
 // 지하철 기후동행카드 적용 노선 코드 (서울시 공식 고시 기준)
 // 제외: 신분당선(11), GTX
 const CLIMATE_SUBWAY_CODES = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 100, 101, 104, 109, 110]);
 
 /**
  * ODsay subPath 하나가 기후동행카드로 이용 가능한지 판단
- * @param {object} subPath - ODsay subPath 객체
- * @param {Set<string>} climateRouteIds - BE에서 가져온 버스 route_id Set
  */
-function isSubPathClimate(subPath, climateRouteIds) {
+function isSubPathClimate(subPath) {
   const { trafficType, lane = [] } = subPath;
-  if (trafficType === 3) return true; // 도보는 무조건 통과
+  if (trafficType === 3) return true; // 도보
   if (trafficType === 1) {
-    // 지하철: subwayCode 화이트리스트 확인
     return lane.some((l) => CLIMATE_SUBWAY_CODES.has(l.subwayCode));
   }
   if (trafficType === 2) {
-    // 버스: busID가 DB climate-eligible 목록에 있는지 확인
-    return lane.some((l) => climateRouteIds.has(String(l.busID)));
+    return lane.some((l) => isClimateEligibleByRouteNo(l.busNo));
   }
   return false;
 }
 
-/**
- * ODsay 경로(path) 전체가 기후동행카드로 100% 이용 가능한지 판단
- */
-export function isPathFullyClimate(subPaths, climateRouteIds) {
+export function isPathFullyClimate(subPaths) {
   const transits = subPaths.filter((p) => p.trafficType !== 3);
   if (transits.length === 0) return false;
-  return transits.every((p) => isSubPathClimate(p, climateRouteIds));
+  return transits.every(isSubPathClimate);
 }
 
-/**
- * 경로 내 각 구간의 기후동행 여부를 배열로 반환
- */
-export function getSubPathClimateFlags(subPaths, climateRouteIds) {
+export function getSubPathClimateFlags(subPaths) {
   return subPaths.map((p) => ({
     ...p,
-    climateEligible: isSubPathClimate(p, climateRouteIds),
+    climateEligible: isSubPathClimate(p),
   }));
 }

@@ -6,7 +6,6 @@ import ClimateRoutesPanel from './components/ClimateRoutesPanel';
 import RouteSearchPanel from './components/RouteSearchPanel';
 import RouteResultPanel from './components/RouteResultPanel';
 import { useGeolocation } from './hooks/useGeolocation';
-import { useClimateRouteIds } from './hooks/useClimateRouteIds';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes } from './api/busApi';
 import { searchTransitRoute } from './api/odsayApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
@@ -14,7 +13,6 @@ import './App.css';
 
 export default function App() {
   const { position, isFallback } = useGeolocation();
-  const { climateRouteIds } = useClimateRouteIds();
 
   const [stations, setStations] = useState([]);
   const [stationsError, setStationsError] = useState(null);
@@ -89,7 +87,7 @@ export default function App() {
       // 각 subPath에 기후동행 여부 태깅
       const tagged = paths.map((path) => ({
         ...path,
-        subPath: getSubPathClimateFlags(path.subPath ?? [], climateRouteIds),
+        subPath: getSubPathClimateFlags(path.subPath ?? []),
       }));
       setRoutePaths(tagged);
     } catch (e) {
@@ -163,7 +161,6 @@ export default function App() {
         {routePaths.length > 0 && (
           <RouteResultPanel
             paths={routePaths}
-            climateRouteIds={climateRouteIds}
             onSelectPath={handleSelectPath}
             selectedPath={selectedPath}
             onClose={() => { setRoutePaths([]); setSelectedPath(null); }}
