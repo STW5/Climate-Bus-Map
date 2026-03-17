@@ -5,9 +5,11 @@ import FilterToggle from './components/FilterToggle';
 import ClimateRoutesPanel from './components/ClimateRoutesPanel';
 import RouteSearchPanel from './components/RouteSearchPanel';
 import RouteResultPanel from './components/RouteResultPanel';
+import SelectedRoutePanel from './components/SelectedRoutePanel';
 import { useGeolocation } from './hooks/useGeolocation';
-import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes } from './api/busApi';
-import { searchTransitRoute } from './api/odsayApi';
+import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime } from './api/busApi';
+import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
+import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
 import './App.css';
 
@@ -35,6 +37,8 @@ export default function App() {
   const [routeLoading, setRouteLoading] = useState(false);
   const [routePaths, setRoutePaths] = useState([]);
   const [selectedPath, setSelectedPath] = useState(null);
+  const [boardingTimes, setBoardingTimes] = useState([]);
+  const [selectedBoardingTime, setSelectedBoardingTime] = useState(null);
 
   useEffect(() => {
     if (!position) return;
@@ -77,19 +81,24 @@ export default function App() {
   }, []);
 
   // D-03: 경로 탐색
-  const handleRouteSearch = useCallback(async (destination) => {
+  const handleRouteSearch = useCallback(async (start, destination) => {
     if (!position) return;
     setRouteLoading(true);
     setRoutePaths([]);
     setSelectedPath(null);
+    setBoardingTimes([]);
     try {
-      const paths = await searchTransitRoute(position, destination);
-      // 각 subPath에 기후동행 여부 태깅
+      const paths = await searchTransitRoute(start || position, destination);
+      const actualStart = start || position;
       const tagged = paths.map((path) => ({
         ...path,
+        _start: actualStart,
+        _end: destination,
         subPath: getSubPathClimateFlags(path.subPath ?? []),
       }));
       setRoutePaths(tagged);
+      // 각 경로의 첫 버스 탑승 대기시간 병렬 조회
+      Promise.all(tagged.map(p => fetchBoardingTime(p.subPath ?? []))).then(setBoardingTimes);
     } catch (e) {
       alert(e.message);
     } finally {
@@ -97,14 +106,47 @@ export default function App() {
     }
   }, [position]);
 
-  const handleSelectPath = useCallback((path) => {
-    setSelectedPath(path);
-  }, []);
+  const handleSelectPath = useCallback(async (path, pathIndex) => {
+    setSelectedBoardingTime(boardingTimes[pathIndex] ?? null);
+    // 1. 대중교통 구간: loadLane으로 실제 도형 조회
+    const withLane = await loadLaneForPath(path.info?.mapObj, path.subPath ?? []);
+
+    // 이웃 구간의 첫/끝 좌표 추출 헬퍼
+    const segCoord = (sp, last = false) => {
+      if (!sp) return null;
+      if (sp.graphPos?.length) {
+        const p = last ? sp.graphPos[sp.graphPos.length - 1] : sp.graphPos[0];
+        return { lat: parseFloat(p.y), lng: parseFloat(p.x) };
+      }
+      const stations = sp.passStopList?.stations ?? [];
+      if (stations.length > 0) {
+        const s = last ? stations[stations.length - 1] : stations[0];
+        return { lat: parseFloat(s.y), lng: parseFloat(s.x) };
+      }
+      return null;
+    };
+
+    // 2. 도보 구간: 이웃 대중교통 구간 끝점으로 T-Map 보행자 경로 조회 (병렬)
+    const withWalking = await Promise.all(
+      withLane.map(async (sp, i) => {
+        if (sp.trafficType !== 3) return sp;
+        const startCoord = segCoord(withLane[i - 1], true) ?? path._start;
+        const endCoord   = segCoord(withLane[i + 1], false) ?? path._end;
+        if (!startCoord || !endCoord) return sp;
+        const walkCoords = await getWalkingRoute(startCoord.lat, startCoord.lng, endCoord.lat, endCoord.lng);
+        return walkCoords ? { ...sp, graphPos: walkCoords } : sp;
+      })
+    );
+
+    setSelectedPath({ ...path, subPath: withWalking });
+  }, [boardingTimes]);
 
   const handleRouteClose = useCallback(() => {
     setRouteSearchOpen(false);
     setRoutePaths([]);
     setSelectedPath(null);
+    setBoardingTimes([]);
+    setSelectedBoardingTime(null);
   }, []);
 
   // D-01: 필터 적용
@@ -154,19 +196,30 @@ export default function App() {
         {stationsError && (
           <div className="stations-error">정류장 로드 실패: {stationsError}</div>
         )}
-        {routeSearchOpen && (
+        {routeSearchOpen && !selectedPath && (
           <RouteSearchPanel
             onSearch={handleRouteSearch}
             onClose={handleRouteClose}
             loading={routeLoading}
+            currentPosition={position}
           />
         )}
-        {routePaths.length > 0 && (
+        {(routePaths.length > 0 || routeLoading) && !selectedPath && (
           <RouteResultPanel
             paths={routePaths}
+            loading={routeLoading}
+            boardingTimes={boardingTimes}
             onSelectPath={handleSelectPath}
             selectedPath={selectedPath}
-            onClose={() => { setRoutePaths([]); setSelectedPath(null); }}
+            onClose={() => { setRoutePaths([]); setSelectedPath(null); setBoardingTimes([]); }}
+          />
+        )}
+        {selectedPath && (
+          <SelectedRoutePanel
+            path={selectedPath}
+            boardingTime={selectedBoardingTime}
+            onBack={() => setSelectedPath(null)}
+            onClose={handleRouteClose}
           />
         )}
         {!routeSearchOpen && (
