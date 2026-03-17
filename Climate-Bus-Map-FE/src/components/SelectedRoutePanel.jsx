@@ -65,7 +65,7 @@ function ArrivalChip({ boardingTime }) {
   const remaining = boardingTime.arrivalSec - elapsed;
   const min = Math.floor(remaining / 60);
   const sec = Math.floor(remaining % 60);
-  const label = remaining <= 0 ? '곧 도착' : min > 0 ? `${min}분 후` : `${sec}초 후`;
+  const label = remaining <= 0 ? '곧 도착' : min > 0 ? `${min}분 ${sec}초 후` : `${sec}초 후`;
   const urgent = remaining <= 120;
 
   return (
@@ -151,12 +151,6 @@ export default function SelectedRoutePanel({ path, boardingTime, segmentBoarding
   const fullyClimate = isPathFullyClimate(subPaths);
   const totalTime = path.info?.totalTime ?? 0;
 
-  const boardingMin = boardingTime ? Math.floor(boardingTime.arrivalSec / 60) : null;
-  const boardingLabel = boardingMin !== null
-    ? (boardingMin <= 0 ? '곧 도착' : `${boardingMin}분 후 탑승`)
-    : null;
-  const boardingUrgent = boardingMin !== null && boardingMin <= 2;
-
   return (
     <div className="sel-route-panel">
       {/* 헤더 */}
@@ -176,14 +170,7 @@ export default function SelectedRoutePanel({ path, boardingTime, segmentBoarding
 
       {/* 배지 행 */}
       <div className="sel-route-badges">
-        {boardingLabel && (
-          <span className={`boarding-chip${boardingUrgent ? ' boarding-chip--urgent' : ''}`}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-            </svg>
-            {boardingLabel}
-          </span>
-        )}
+        <ArrivalChip boardingTime={boardingTime} />
         <span className={`climate-badge ${fullyClimate ? 'eligible' : 'ineligible'}`}>
           {fullyClimate ? '기후동행 100%' : '일부 불가'}
         </span>
