@@ -5,10 +5,11 @@ import FilterToggle from './components/FilterToggle';
 import ClimateRoutesPanel from './components/ClimateRoutesPanel';
 import RouteResultPanel from './components/RouteResultPanel';
 import SelectedRoutePanel from './components/SelectedRoutePanel';
+import HeaderSearch from './components/HeaderSearch';
 import { useGeolocation } from './hooks/useGeolocation';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
 import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
-import { getWalkingRoute, searchPlace } from './api/tmapApi';
+import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
 import './App.css';
 
@@ -40,12 +41,6 @@ export default function App() {
   const [segmentBoardingTimes, setSegmentBoardingTimes] = useState([]);
   const selectedPathRef = useRef(null);
 
-  // 헤더 인라인 검색
-  const [headerQuery, setHeaderQuery] = useState('');
-  const [headerSuggestions, setHeaderSuggestions] = useState([]);
-  const [headerSearching, setHeaderSearching] = useState(false);
-  const [headerOpen, setHeaderOpen] = useState(false);
-  const headerDebounce = useRef(null);
 
   useEffect(() => {
     if (!position) return;
@@ -68,17 +63,6 @@ export default function App() {
       .finally(() => setClimateLoading(false));
   }, [position]);
 
-  // 헤더 목적지 검색 디바운스
-  useEffect(() => {
-    if (!headerQuery.trim()) { setHeaderSuggestions([]); return; }
-    clearTimeout(headerDebounce.current);
-    headerDebounce.current = setTimeout(async () => {
-      setHeaderSearching(true);
-      try { setHeaderSuggestions(await searchPlace(headerQuery)); }
-      catch { setHeaderSuggestions([]); }
-      finally { setHeaderSearching(false); }
-    }, 400);
-  }, [headerQuery]);
 
   const handleStationSelect = useCallback(async (station) => {
     setSelectedStation(station);
@@ -195,13 +179,6 @@ export default function App() {
     return () => clearInterval(id);
   }, [selectedPath]);
 
-  const handleHeaderSelect = useCallback((place) => {
-    setHeaderQuery(place.name);
-    setHeaderSuggestions([]);
-    setHeaderOpen(false);
-    handleRouteSearch(null, place);
-  }, [handleRouteSearch]);
-
   const handleRouteClose = useCallback(() => {
     setRoutePaths([]);
     setSelectedPath(null);
@@ -209,7 +186,6 @@ export default function App() {
     setBoardingTimes([]);
     setSelectedBoardingTime(null);
     setSegmentBoardingTimes([]);
-    setHeaderQuery('');
   }, []);
 
   // D-01: 필터 적용
@@ -228,47 +204,12 @@ export default function App() {
             {isFallback && <p className="fallback-notice">서울시청 기준</p>}
           </div>
         </div>
-        <div className="header-search-wrapper">
-          <div className={`header-search-bar${headerOpen ? ' header-search-bar--active' : ''}`}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--text-muted)' }}>
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input
-              className="header-search-input"
-              placeholder="어디로 가시나요?"
-              value={headerQuery}
-              onChange={e => { setHeaderQuery(e.target.value); setHeaderOpen(true); }}
-              onFocus={() => setHeaderOpen(true)}
-              onBlur={() => setTimeout(() => setHeaderOpen(false), 200)}
-              disabled={!!selectedPath}
-            />
-            {headerQuery && !selectedPath && (
-              <button className="header-search-clear" onClick={() => { setHeaderQuery(''); setHeaderSuggestions([]); }} aria-label="지우기">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            )}
-          </div>
-          {headerOpen && (headerSuggestions.length > 0 || headerSearching) && (
-            <ul className="header-suggestions">
-              {headerSearching && (
-                <li className="header-suggestion-item header-suggestion-item--loading">
-                  <div className="suggestion-spinner" />검색 중...
-                </li>
-              )}
-              {!headerSearching && headerSuggestions.map((s, i) => (
-                <li key={i} className="header-suggestion-item" onMouseDown={() => handleHeaderSelect(s)}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  <div className="header-suggestion-text">
-                    <span className="header-suggestion-name">{s.name}</span>
-                    {s.address && <span className="header-suggestion-addr">{s.address}</span>}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <HeaderSearch
+          onSearch={handleRouteSearch}
+          onClear={handleRouteClose}
+          currentPosition={position}
+          isLocked={!!selectedPath}
+        />
         <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
       </header>
       <div className="map-wrapper">
