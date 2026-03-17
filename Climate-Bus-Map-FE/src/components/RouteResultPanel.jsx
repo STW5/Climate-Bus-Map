@@ -150,7 +150,7 @@ function RouteCard({ path, boardingTime, onClick, selected }) {
       onClick={onClick}
     >
       <div className="route-card__header">
-        <div>
+        <div className="route-card__times">
           <span className="route-card__time">{totalTime}분</span>
           <span className="route-card__arrival">{arrivalTimeStr(totalTime)}</span>
         </div>

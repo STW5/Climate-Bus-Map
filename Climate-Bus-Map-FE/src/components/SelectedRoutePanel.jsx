@@ -43,11 +43,18 @@ function WalkIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5a2 2 0 100-4 2 2 0 000 4zm-3.19 5.86l-1.8 9.64h2.05l1.1-5.38 2.34 2.38v5h2v-6.5l-2.35-2.38.73-3.62A7.3 7.3 0 0019 13v-2a5.28 5.28 0 01-4.22-2.11l-1-1.5a2 2 0 00-1.64-.89c-.24 0-.49.05-.72.14L6 9v4h2V10.3l2.31-.94z"/></svg>;
 }
 
-function SegmentDetail({ subPath }) {
+function clockStr(offsetMin) {
+  const d = new Date(Date.now() + offsetMin * 60000);
+  const h = d.getHours(), m = d.getMinutes().toString().padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+function SegmentDetail({ subPath, startMin }) {
   const { trafficType, sectionTime, stationCount, distance, lane = [], passStopList, climateEligible } = subPath;
   const stations = passStopList?.stations ?? [];
   const fromStation = stations[0]?.stationName;
   const toStation = stations[stations.length - 1]?.stationName;
+  const endMin = startMin + (sectionTime ?? 0);
 
   if (trafficType === 3) {
     const dist = distance >= 1000 ? `${(distance/1000).toFixed(1)}km` : `${distance ?? 0}m`;
@@ -55,6 +62,7 @@ function SegmentDetail({ subPath }) {
       <div className="sel-seg sel-seg--walk">
         <div className="sel-seg__icon sel-seg__icon--walk"><WalkIcon /></div>
         <div className="sel-seg__body">
+          <span className="sel-seg__time-label">{clockStr(startMin)}</span>
           <span className="sel-seg__label">도보 이동</span>
           <span className="sel-seg__meta">{sectionTime}분 · {dist}</span>
         </div>
@@ -77,6 +85,11 @@ function SegmentDetail({ subPath }) {
         <div className="sel-seg__line" style={{ background: color }} />
       </div>
       <div className="sel-seg__body">
+        <div className="sel-seg__time-range">
+          <span className="sel-seg__time-label">{clockStr(startMin)}</span>
+          <span className="sel-seg__time-arrow">→</span>
+          <span className="sel-seg__time-label">{clockStr(endMin)}</span>
+        </div>
         <div className="sel-seg__header">
           <span className="sel-seg__badge" style={{ background: `${color}18`, color }}>{routeName}</span>
           <span className="sel-seg__time">{sectionTime}분</span>
@@ -151,8 +164,12 @@ export default function SelectedRoutePanel({ path, boardingTime, onBack, onClose
 
       {/* 구간 상세 */}
       <div className="sel-route-segments">
-        {subPaths.map((sp, i) => (
-          <SegmentDetail key={i} subPath={sp} />
+        {subPaths.reduce((acc, sp, i) => {
+          const startMin = i === 0 ? 0 : acc[i - 1].endMin;
+          acc.push({ sp, startMin, endMin: startMin + (sp.sectionTime ?? 0) });
+          return acc;
+        }, []).map(({ sp, startMin }, i) => (
+          <SegmentDetail key={i} subPath={sp} startMin={startMin} />
         ))}
       </div>
     </div>

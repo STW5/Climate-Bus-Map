@@ -1022,7 +1022,26 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 8px;
+  padding-top: 6px;
+}
+
+.sel-seg__time-range {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.sel-seg__time-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.sel-seg__time-arrow {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .sel-seg__label {
@@ -1186,6 +1205,12 @@ body {
   margin-bottom: 10px;
 }
 
+.route-card__times {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .route-card__time {
   font-size: 20px;
   font-weight: 800;
@@ -1195,11 +1220,10 @@ body {
 }
 
 .route-card__arrival {
-  display: block;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: -0.2px;
-  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-primary);
+  letter-spacing: -0.3px;
 }
 
 /* 탑승 대기 시간 칩 */
