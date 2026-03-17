@@ -60,36 +60,78 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   useEffect(() => {
     if (!mapRef.current || !tmapReady) return;
 
-    // 이전 폴리라인 제거
     polylinesRef.current.forEach((p) => p.setMap(null));
     polylinesRef.current = [];
 
     if (!routePath) return;
 
     const subPaths = routePath.subPath ?? [];
-    subPaths.forEach((subPath) => {
-      if (subPath.trafficType === 3) return; // 도보 제외
+    const allCoords = []; // 전체 좌표 (bounds 계산용)
 
-      const stations = subPath.passStopList?.stations ?? [];
-      if (stations.length < 2) return;
+    // 구간별 색상
+    const segmentColor = (sp) => {
+      if (sp.trafficType === 3) return '#9e9e9e';          // 도보: 회색
+      if (sp.climateEligible === false) return '#d32f2f';   // 기후동행 불가: 빨강
+      if (sp.trafficType === 1) return '#1a56c4';           // 지하철: 파랑
+      return '#1a6b3a';                                     // 버스: 초록
+    };
 
-      const path = stations.map((s) => new window.Tmapv2.LatLng(parseFloat(s.y), parseFloat(s.x)));
-      const color = subPath.climateEligible === false ? '#d32f2f' : '#1a6b3a';
-
-      const polyline = new window.Tmapv2.Polyline({
-        path,
-        strokeColor: color,
-        strokeWeight: 5,
-        strokeOpacity: 0.85,
+    const drawPolyline = (coords, color, isDashed) => {
+      if (coords.length < 2) return null;
+      // 흰색 테두리 (가독성)
+      const outline = new window.Tmapv2.Polyline({
+        path: coords,
+        strokeColor: '#ffffff',
+        strokeWeight: isDashed ? 0 : 8,
+        strokeOpacity: 0.6,
         map: mapRef.current,
       });
-      polylinesRef.current.push(polyline);
+      const line = new window.Tmapv2.Polyline({
+        path: coords,
+        strokeColor: color,
+        strokeWeight: isDashed ? 3 : 5,
+        strokeOpacity: isDashed ? 0.6 : 0.95,
+        strokeStyle: isDashed ? 'dash' : 'solid',
+        map: mapRef.current,
+      });
+      polylinesRef.current.push(outline, line);
+      return line;
+    };
+
+    let prevLastCoord = null;
+
+    subPaths.forEach((subPath) => {
+      const stationList = subPath.passStopList?.stations ?? [];
+      const coords = stationList
+        .map((s) => {
+          const lat = parseFloat(s.y), lng = parseFloat(s.x);
+          if (!lat || !lng) return null;
+          return new window.Tmapv2.LatLng(lat, lng);
+        })
+        .filter(Boolean);
+
+      if (coords.length === 0) return;
+
+      // 이전 구간 끝 → 현재 구간 시작 연결 (끊김 방지)
+      if (prevLastCoord) {
+        drawPolyline([prevLastCoord, coords[0]], '#cccccc', true);
+      }
+
+      const color = segmentColor(subPath);
+      const isDashed = subPath.trafficType === 3;
+      drawPolyline(coords, color, isDashed);
+
+      allCoords.push(...coords);
+      prevLastCoord = coords[coords.length - 1];
     });
 
-    // 첫 번째 정류소로 지도 이동
-    const firstStation = subPaths.find((p) => p.trafficType !== 3)?.passStopList?.stations?.[0];
-    if (firstStation) {
-      mapRef.current.panTo(new window.Tmapv2.LatLng(parseFloat(firstStation.y), parseFloat(firstStation.x)));
+    // 전체 경로 보이도록 지도 범위 조정
+    if (allCoords.length > 0) {
+      const lats = allCoords.map((c) => c.lat());
+      const lngs = allCoords.map((c) => c.lng());
+      const sw = new window.Tmapv2.LatLng(Math.min(...lats), Math.min(...lngs));
+      const ne = new window.Tmapv2.LatLng(Math.max(...lats), Math.max(...lngs));
+      mapRef.current.fitBounds(new window.Tmapv2.LatLngBounds(sw, ne));
     }
   }, [tmapReady, routePath]);
 
