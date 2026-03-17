@@ -61,7 +61,9 @@ public class SeoulBusApiAdapter implements BusApiPort {
 
             String headerCd = getTagValue("headerCd", doc);
             if (!"0".equals(headerCd)) {
-                throw new BusApiException(getTagValue("headerMsg", doc));
+                String msg = getTagValue("headerMsg", doc);
+                log.info("도착정보 API 비정상 응답 (headerCd={}): {}", headerCd, msg);
+                return List.of(); // 결과 없음 등 비정상 응답 → 빈 목록 반환
             }
 
             NodeList items = doc.getElementsByTagName("itemList");
