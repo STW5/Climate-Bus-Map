@@ -439,23 +439,43 @@ body {
 
 /* ─── Filter Toggle (D-01) ───────────────── */
 .filter-toggle {
-  margin-left: auto;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
   border: 1.5px solid var(--border);
   background: var(--bg-card);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  letter-spacing: -0.2px;
+}
+
+.filter-toggle:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-toggle__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background 0.2s;
 }
 
 .filter-toggle--active {
   background: var(--green-light);
   color: var(--green-primary);
   border-color: var(--green-dim);
+}
+
+.filter-toggle--active .filter-toggle__dot {
+  background: var(--green-primary);
 }
 
 /* ─── Climate Routes Panel (D-02) ───────── */
@@ -513,22 +533,30 @@ body {
 /* ─── Route Search Toggle (헤더 버튼) ───── */
 .route-search-toggle {
   margin-left: auto;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
   border: 1.5px solid var(--border);
   background: var(--bg-card);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  margin-right: 8px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  letter-spacing: -0.2px;
+  margin-right: 7px;
+}
+
+.route-search-toggle:hover {
+  box-shadow: var(--shadow-sm);
 }
 
 .route-search-toggle--active {
-  background: #e8f0fe;
-  color: #1a56c4;
+  background: var(--blue-light);
+  color: var(--blue-primary);
   border-color: #c5d5f8;
 }
 
