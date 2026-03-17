@@ -1,5 +1,4 @@
 import ClimateBadge from './ClimateBadge';
-import { secToMin } from '../utils/format';
 
 function SkeletonRow() {
   return (
@@ -30,6 +29,35 @@ function EmptyState() {
   );
 }
 
+function ArrivalTime({ sec, primary }) {
+  const min = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (min === 0) {
+    return (
+      <span className={primary ? 'arrival-first' : 'arrival-second'}>
+        <span className="arrival-num">곧 도착</span>
+      </span>
+    );
+  }
+  return (
+    <span className={primary ? 'arrival-first' : 'arrival-second'}>
+      <span className="arrival-num">{min}</span>
+      <span className="arrival-unit">분 {s > 0 ? `${s}초` : ''}</span>
+    </span>
+  );
+}
+
+// 노선 번호로 서울 버스 유형 판별 → 배지 색상
+function routeBadgeStyle(routeNo) {
+  const no = String(routeNo ?? '');
+  if (no.startsWith('N'))          return { background: '#283593', color: '#fff' }; // 심야
+  if (/^9\d{3}/.test(no))          return { background: '#c62828', color: '#fff' }; // 광역
+  if (/^[1-3]\d{2,3}/.test(no))   return { background: '#1565c0', color: '#fff' }; // 간선
+  if (/^[4-7]\d{3}/.test(no))     return { background: '#2e7d32', color: '#fff' }; // 지선
+  if (/^0\d|^\d{1,2}$/.test(no))  return { background: '#e65100', color: '#fff' }; // 순환
+  return { background: 'var(--green-primary)', color: '#fff' };
+}
+
 export default function ArrivalPanel({ station, arrivals, loading, error, onClose }) {
   return (
     <div className={`arrival-panel${station ? ' open' : ''}`}>
@@ -40,7 +68,6 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
       <div className="panel-header">
         <div className="station-info">
           <h2>{station?.stationName ?? ''}</h2>
-          {station?.stationId && <p className="station-id">정류장 ID {station.stationId}</p>}
         </div>
         <button className="close-btn" onClick={onClose} aria-label="닫기">✕</button>
       </div>
@@ -61,14 +88,14 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
         )}
         {!loading && error && <p className="status-msg error">{error}</p>}
         {!loading && !error && arrivals.length === 0 && station && <EmptyState />}
-        {!loading && !error && arrivals.map((arrival) => (
-          <div key={arrival.routeId} className="arrival-item">
+        {!loading && !error && arrivals.map((arrival, i) => (
+          <div key={`${arrival.routeId}-${i}`} className="arrival-item">
             <div className="route-left">
-              <div className="route-badge">{arrival.routeNo}</div>
+              <div className="route-badge" style={routeBadgeStyle(arrival.routeNo)}>{arrival.routeNo}</div>
               <div className="route-times">
-                <span className="arrival-first">{secToMin(arrival.arrivalSec1)}</span>
+                <ArrivalTime sec={arrival.arrivalSec1} primary />
                 {arrival.arrivalSec2 > 0 && (
-                  <span className="arrival-second">{secToMin(arrival.arrivalSec2)}</span>
+                  <ArrivalTime sec={arrival.arrivalSec2} />
                 )}
               </div>
             </div>
