@@ -104,6 +104,7 @@ body {
 }
 
 .header-search-bar {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -112,6 +113,7 @@ body {
   border: 1.5px solid var(--border);
   border-radius: 999px;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 
 .header-search-bar--active {
