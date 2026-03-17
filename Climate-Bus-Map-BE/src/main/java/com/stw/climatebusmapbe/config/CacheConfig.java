@@ -21,7 +21,8 @@ public class CacheConfig {
         manager.setCaches(List.of(
                 buildCache("nearbyStations", 5, TimeUnit.MINUTES),
                 buildCache("arrivals", 30, TimeUnit.SECONDS),
-                buildCache("climateRouteIds", 60, TimeUnit.MINUTES)
+                buildCache("climateRouteIds", 60, TimeUnit.MINUTES),
+                buildCache("nearbyClimateRoutes", 5, TimeUnit.MINUTES)
         ));
         return manager;
     }

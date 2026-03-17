@@ -32,6 +32,7 @@ public class StationService {
         return new NearbyStationsResponse(stations);
     }
 
+    @Cacheable(value = "nearbyClimateRoutes", key = "#lat + '_' + #lng + '_' + #radius")
     public ClimateRoutesResponse getNearbyClimateRoutes(double lat, double lng, int radius) {
         log.info("주변 기후동행 노선 집계: lat={}, lng={}, radius={}", lat, lng, radius);
 
@@ -42,8 +43,7 @@ public class StationService {
         List<ClimateRoutesResponse.RouteDto> climateRoutes = new ArrayList<>();
         Set<String> climateStationIds = new LinkedHashSet<>();
 
-        int limit = Math.min(stations.size(), 10);
-        for (int i = 0; i < limit; i++) {
+        for (int i = 0; i < stations.size(); i++) {
             String stationId = stations.get(i).getStationId();
             try {
                 List<BusArrivalDto> arrivals = busApiPort.getArrivals(stationId);
