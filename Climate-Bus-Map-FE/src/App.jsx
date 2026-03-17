@@ -3,12 +3,19 @@ import MapView from './components/MapView';
 import ArrivalPanel from './components/ArrivalPanel';
 import FilterToggle from './components/FilterToggle';
 import ClimateRoutesPanel from './components/ClimateRoutesPanel';
+import RouteSearchPanel from './components/RouteSearchPanel';
+import RouteResultPanel from './components/RouteResultPanel';
 import { useGeolocation } from './hooks/useGeolocation';
+import { useClimateRouteIds } from './hooks/useClimateRouteIds';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes } from './api/busApi';
+import { searchTransitRoute } from './api/odsayApi';
+import { getSubPathClimateFlags } from './utils/climateChecker';
 import './App.css';
 
 export default function App() {
   const { position, isFallback } = useGeolocation();
+  const { climateRouteIds } = useClimateRouteIds();
+
   const [stations, setStations] = useState([]);
   const [stationsError, setStationsError] = useState(null);
   const [selectedStation, setSelectedStation] = useState(null);
@@ -18,13 +25,18 @@ export default function App() {
 
   // D-01: 기후동행 필터
   const [filterActive, setFilterActive] = useState(false);
-  // stationId → arrivals 캐시 (필터 판단용)
   const [arrivalCache, setArrivalCache] = useState({});
 
   // D-02: 주변 기후동행 노선 패널
   const [climateRoutes, setClimateRoutes] = useState([]);
   const [climateLoading, setClimateLoading] = useState(false);
   const [climateError, setClimateError] = useState(null);
+
+  // D-03: 경로 탐색
+  const [routeSearchOpen, setRouteSearchOpen] = useState(false);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routePaths, setRoutePaths] = useState([]);
+  const [selectedPath, setSelectedPath] = useState(null);
 
   useEffect(() => {
     if (!position) return;
@@ -66,12 +78,43 @@ export default function App() {
     setArrivalError(null);
   }, []);
 
-  // D-01: 필터 적용 — 도착정보 캐시에서 기후동행 가능 버스가 있는 정류소만 표시
+  // D-03: 경로 탐색
+  const handleRouteSearch = useCallback(async (destination) => {
+    if (!position) return;
+    setRouteLoading(true);
+    setRoutePaths([]);
+    setSelectedPath(null);
+    try {
+      const paths = await searchTransitRoute(position, destination);
+      // 각 subPath에 기후동행 여부 태깅
+      const tagged = paths.map((path) => ({
+        ...path,
+        subPath: getSubPathClimateFlags(path.subPath ?? [], climateRouteIds),
+      }));
+      setRoutePaths(tagged);
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setRouteLoading(false);
+    }
+  }, [position, climateRouteIds]);
+
+  const handleSelectPath = useCallback((path) => {
+    setSelectedPath(path);
+  }, []);
+
+  const handleRouteClose = useCallback(() => {
+    setRouteSearchOpen(false);
+    setRoutePaths([]);
+    setSelectedPath(null);
+  }, []);
+
+  // D-01: 필터 적용
   const displayedStations = useMemo(() => {
     if (!filterActive) return stations;
     return stations.filter((s) => {
       const cached = arrivalCache[s.stationId];
-      if (!cached) return true; // 미조회 정류소는 일단 표시
+      if (!cached) return true;
       return cached.some((a) => a.climateEligible);
     });
   }, [filterActive, stations, arrivalCache]);
@@ -84,6 +127,13 @@ export default function App() {
           <h1>기후동행 버스 지도</h1>
           {isFallback && <p className="fallback-notice">위치 사용 불가 — 서울시청 기준</p>}
         </div>
+        <button
+          className={`route-search-toggle${routeSearchOpen ? ' route-search-toggle--active' : ''}`}
+          onClick={() => setRouteSearchOpen((v) => !v)}
+          aria-label="경로 탐색"
+        >
+          🗺 경로
+        </button>
         <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
       </header>
       <div className="map-wrapper">
@@ -92,6 +142,7 @@ export default function App() {
             center={position}
             stations={displayedStations}
             onStationSelect={handleStationSelect}
+            routePath={selectedPath}
           />
         ) : (
           <div className="loading-screen">
@@ -102,11 +153,29 @@ export default function App() {
         {stationsError && (
           <div className="stations-error">정류장 로드 실패: {stationsError}</div>
         )}
-        <ClimateRoutesPanel
-          routes={climateRoutes}
-          loading={climateLoading}
-          error={climateError}
-        />
+        {routeSearchOpen && (
+          <RouteSearchPanel
+            onSearch={handleRouteSearch}
+            onClose={handleRouteClose}
+            loading={routeLoading}
+          />
+        )}
+        {routePaths.length > 0 && (
+          <RouteResultPanel
+            paths={routePaths}
+            climateRouteIds={climateRouteIds}
+            onSelectPath={handleSelectPath}
+            selectedPath={selectedPath}
+            onClose={() => { setRoutePaths([]); setSelectedPath(null); }}
+          />
+        )}
+        {!routeSearchOpen && (
+          <ClimateRoutesPanel
+            routes={climateRoutes}
+            loading={climateLoading}
+            error={climateError}
+          />
+        )}
         <ArrivalPanel
           station={selectedStation}
           arrivals={arrivals}

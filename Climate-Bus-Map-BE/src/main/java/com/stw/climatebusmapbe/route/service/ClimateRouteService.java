@@ -4,6 +4,7 @@ import com.stw.climatebusmapbe.route.dto.ClimateRouteResponse;
 import com.stw.climatebusmapbe.route.entity.ClimateEligibleRoute;
 import com.stw.climatebusmapbe.route.repository.ClimateEligibleRouteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,13 @@ import java.util.List;
 public class ClimateRouteService {
 
     private final ClimateEligibleRouteRepository climateEligibleRouteRepository;
+
+    @Cacheable("climateRouteIds")
+    public List<String> getClimateRouteIds() {
+        return climateEligibleRouteRepository.findAll().stream()
+                .map(ClimateEligibleRoute::getRouteId)
+                .toList();
+    }
 
     public ClimateRouteResponse getAllRoutes() {
         List<ClimateEligibleRoute> routes = climateEligibleRouteRepository.findAll();

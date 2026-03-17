@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -18,5 +21,10 @@ public class ClimateRouteController {
     @GetMapping("/climate-routes")
     public ApiResponse<ClimateRouteResponse> getClimateRoutes() {
         return ApiResponse.ok(climateRouteService.getAllRoutes());
+    }
+
+    @GetMapping("/routes/climate-eligible")
+    public ApiResponse<Map<String, List<String>>> getClimateEligibleRouteIds() {
+        return ApiResponse.ok(Map.of("routeIds", climateRouteService.getClimateRouteIds()));
     }
 }

@@ -23,3 +23,11 @@ export async function fetchNearbyClimateRoutes(lat, lng, radius = 500) {
   if (!json.success) throw new Error(json.error);
   return json.data;
 }
+
+export async function fetchClimateEligibleRouteIds() {
+  const res = await fetch(`${BASE_URL}/api/v1/routes/climate-eligible`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error);
+  return json.data.routeIds;
+}

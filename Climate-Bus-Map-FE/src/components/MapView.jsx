@@ -14,10 +14,11 @@ function GpsIcon() {
   );
 }
 
-export default function MapView({ center, stations, onStationSelect }) {
+export default function MapView({ center, stations, onStationSelect, routePath }) {
   const tmapReady = useTmapReady();
   const mapRef = useRef(null);
   const markersRef = useRef([]);
+  const polylinesRef = useRef([]);
 
   // 지도 초기화 (SDK 로드 + center 확정 후 1회)
   useEffect(() => {
@@ -54,6 +55,43 @@ export default function MapView({ center, stations, onStationSelect }) {
       markersRef.current.push(marker);
     });
   }, [tmapReady, stations, onStationSelect]);
+
+  // 경로 폴리라인 그리기
+  useEffect(() => {
+    if (!mapRef.current || !tmapReady) return;
+
+    // 이전 폴리라인 제거
+    polylinesRef.current.forEach((p) => p.setMap(null));
+    polylinesRef.current = [];
+
+    if (!routePath) return;
+
+    const subPaths = routePath.subPath ?? [];
+    subPaths.forEach((subPath) => {
+      if (subPath.trafficType === 3) return; // 도보 제외
+
+      const stations = subPath.passStopList?.stations ?? [];
+      if (stations.length < 2) return;
+
+      const path = stations.map((s) => new window.Tmapv2.LatLng(parseFloat(s.y), parseFloat(s.x)));
+      const color = subPath.climateEligible === false ? '#d32f2f' : '#1a6b3a';
+
+      const polyline = new window.Tmapv2.Polyline({
+        path,
+        strokeColor: color,
+        strokeWeight: 5,
+        strokeOpacity: 0.85,
+        map: mapRef.current,
+      });
+      polylinesRef.current.push(polyline);
+    });
+
+    // 첫 번째 정류소로 지도 이동
+    const firstStation = subPaths.find((p) => p.trafficType !== 3)?.passStopList?.stations?.[0];
+    if (firstStation) {
+      mapRef.current.panTo(new window.Tmapv2.LatLng(parseFloat(firstStation.y), parseFloat(firstStation.x)));
+    }
+  }, [tmapReady, routePath]);
 
   const handleRecenter = useCallback(() => {
     if (!mapRef.current || !center) return;
