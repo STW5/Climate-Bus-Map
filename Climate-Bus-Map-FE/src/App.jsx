@@ -25,10 +25,10 @@ export default function App() {
 
   // D-01: 기후동행 필터
   const [filterActive, setFilterActive] = useState(false);
-  const [arrivalCache, setArrivalCache] = useState({});
 
   // D-02: 주변 기후동행 노선 패널
   const [climateRoutes, setClimateRoutes] = useState([]);
+  const [climateStationIds, setClimateStationIds] = useState(new Set());
   const [climateLoading, setClimateLoading] = useState(false);
   const [climateError, setClimateError] = useState(null);
 
@@ -53,7 +53,10 @@ export default function App() {
     setClimateLoading(true);
     setClimateError(null);
     fetchNearbyClimateRoutes(position.lat, position.lng)
-      .then((data) => setClimateRoutes(data.routes || []))
+      .then((data) => {
+        setClimateRoutes(data.routes || []);
+        setClimateStationIds(new Set(data.climateStationIds || []));
+      })
       .catch((e) => setClimateError(e.message))
       .finally(() => setClimateLoading(false));
   }, [position]);
@@ -66,7 +69,6 @@ export default function App() {
     try {
       const data = await fetchArrivals(station.stationId);
       setArrivals(data);
-      setArrivalCache((prev) => ({ ...prev, [station.stationId]: data }));
     } catch (e) {
       setArrivalError(e.message);
     } finally {
@@ -152,12 +154,8 @@ export default function App() {
   // D-01: 필터 적용
   const displayedStations = useMemo(() => {
     if (!filterActive) return stations;
-    return stations.filter((s) => {
-      const cached = arrivalCache[s.stationId];
-      if (!cached) return true;
-      return cached.some((a) => a.climateEligible);
-    });
-  }, [filterActive, stations, arrivalCache]);
+    return stations.filter((s) => climateStationIds.has(s.stationId));
+  }, [filterActive, stations, climateStationIds]);
 
   return (
     <div className="app">

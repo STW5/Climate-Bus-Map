@@ -48,6 +48,7 @@ public class StationService {
         // 정류소별 도착 버스 조회 → 기후동행 가능 노선 집계 (최대 10개 정류소)
         Set<String> seenRouteIds = new LinkedHashSet<>();
         List<ClimateRoutesResponse.RouteDto> climateRoutes = new ArrayList<>();
+        Set<String> climateStationIds = new LinkedHashSet<>();
 
         int limit = Math.min(stations.size(), 10);
         for (int i = 0; i < limit; i++) {
@@ -56,11 +57,14 @@ public class StationService {
                 List<BusArrivalDto> arrivals = busApiPort.getArrivals(stationId);
                 for (BusArrivalDto arrival : arrivals) {
                     String routeId = arrival.getRouteId();
-                    if (eligibleRoutes.containsKey(routeId) && seenRouteIds.add(routeId)) {
-                        ClimateEligibleRoute route = eligibleRoutes.get(routeId);
-                        climateRoutes.add(new ClimateRoutesResponse.RouteDto(
-                                routeId, arrival.getRouteNo(), route.getRouteType()
-                        ));
+                    if (eligibleRoutes.containsKey(routeId)) {
+                        climateStationIds.add(stationId);
+                        if (seenRouteIds.add(routeId)) {
+                            ClimateEligibleRoute route = eligibleRoutes.get(routeId);
+                            climateRoutes.add(new ClimateRoutesResponse.RouteDto(
+                                    routeId, arrival.getRouteNo(), route.getRouteType()
+                            ));
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -68,6 +72,6 @@ public class StationService {
             }
         }
 
-        return new ClimateRoutesResponse(climateRoutes, stations.size());
+        return new ClimateRoutesResponse(climateRoutes, stations.size(), new ArrayList<>(climateStationIds));
     }
 }

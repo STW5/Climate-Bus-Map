@@ -10,6 +10,7 @@ import java.util.List;
 public class ClimateRoutesResponse {
     private List<RouteDto> routes;
     private int stationCount;
+    private List<String> climateStationIds;
 
     @Getter
     @AllArgsConstructor
