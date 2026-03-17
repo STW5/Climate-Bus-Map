@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import MapView from './components/MapView';
 import ArrivalPanel from './components/ArrivalPanel';
 import FilterToggle from './components/FilterToggle';
@@ -40,6 +40,7 @@ export default function App() {
   const [boardingTimes, setBoardingTimes] = useState([]);
   const [selectedBoardingTime, setSelectedBoardingTime] = useState(null);
   const [segmentBoardingTimes, setSegmentBoardingTimes] = useState([]);
+  const selectedPathRef = useRef(null);
 
   useEffect(() => {
     if (!position) return;
@@ -147,14 +148,27 @@ export default function App() {
 
     const finalPath = { ...path, subPath: withWalking };
     setSelectedPath(finalPath);
+    selectedPathRef.current = finalPath;
     // 구간별 실시간 버스 도착 시간 조회 (백그라운드)
     fetchSegmentBoardingTimes(finalPath.subPath).then(setSegmentBoardingTimes);
   }, [boardingTimes]);
+
+  // 30초마다 구간별 도착 시간 재조회
+  useEffect(() => {
+    if (!selectedPathRef.current) return;
+    const id = setInterval(() => {
+      if (selectedPathRef.current) {
+        fetchSegmentBoardingTimes(selectedPathRef.current.subPath).then(setSegmentBoardingTimes);
+      }
+    }, 30000);
+    return () => clearInterval(id);
+  }, [selectedPath]);
 
   const handleRouteClose = useCallback(() => {
     setRouteSearchOpen(false);
     setRoutePaths([]);
     setSelectedPath(null);
+    selectedPathRef.current = null;
     setBoardingTimes([]);
     setSelectedBoardingTime(null);
     setSegmentBoardingTimes([]);

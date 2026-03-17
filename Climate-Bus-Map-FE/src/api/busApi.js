@@ -43,7 +43,7 @@ async function fetchOneBusArrival(subPath) {
     for (const station of nearby.slice(0, 3)) {
       const arrivals = await fetchArrivals(station.stationId);
       const match = arrivals.find(a => String(a.routeNo) === String(routeNo));
-      if (match) return { arrivalSec: match.arrivalSec1, routeNo };
+      if (match) return { arrivalSec: match.arrivalSec1, routeNo, fetchedAt: Date.now() };
     }
     return null;
   } catch {

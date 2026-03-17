@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { isPathFullyClimate } from '../utils/climateChecker';
 
 const SUBWAY_NAMES = {
@@ -50,10 +51,23 @@ function clockStr(offsetMin) {
 }
 
 function ArrivalChip({ boardingTime }) {
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    if (!boardingTime) return;
+    const id = setInterval(() => tick(n => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [boardingTime]);
+
   if (!boardingTime) return null;
-  const min = Math.floor(boardingTime.arrivalSec / 60);
-  const label = min <= 0 ? '곧 도착' : `${min}분 후`;
-  const urgent = min <= 2;
+
+  const elapsed = (Date.now() - (boardingTime.fetchedAt ?? Date.now())) / 1000;
+  const remaining = boardingTime.arrivalSec - elapsed;
+  const min = Math.floor(remaining / 60);
+  const sec = Math.floor(remaining % 60);
+  const label = remaining <= 0 ? '곧 도착' : min > 0 ? `${min}분 후` : `${sec}초 후`;
+  const urgent = remaining <= 120;
+
   return (
     <span className={`boarding-chip${urgent ? ' boarding-chip--urgent' : ''}`}>
       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
