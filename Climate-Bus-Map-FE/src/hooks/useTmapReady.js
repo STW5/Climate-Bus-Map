@@ -11,7 +11,7 @@ export function useTmapReady() {
 
     const apiKey = import.meta.env.VITE_TMAP_API_KEY;
     const script = document.createElement('script');
-    script.src = `https://apis.openapi.sk.com/tmap/openapi/v2/map.js?version=1&appKey=${apiKey}`;
+    script.src = `https://topopentile1.tmap.co.kr/scriptSDKV2/tmapjs2.min.js?version=20231206&appKey=${apiKey}`;
     script.onload = () => setReady(true);
     script.onerror = () => console.error('T-Map SDK 로드 실패');
     document.head.appendChild(script);
