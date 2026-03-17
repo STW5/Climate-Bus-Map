@@ -197,20 +197,24 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <div className="header-icon">🚌</div>
-        <div className="header-text">
-          <h1>기후동행 버스 지도</h1>
-          {isFallback && <p className="fallback-notice">위치 사용 불가 — 서울시청 기준</p>}
+        <div className="header-logo">
+          <div className="header-icon">🚌</div>
+          <div>
+            <span className="header-brand">ClimateGo</span>
+            {isFallback && <p className="fallback-notice">서울시청 기준</p>}
+          </div>
         </div>
         <button
-          className={`route-search-toggle${routeSearchOpen ? ' route-search-toggle--active' : ''}`}
-          onClick={() => setRouteSearchOpen((v) => !v)}
-          aria-label="목적지 설정"
+          className={`header-search-bar${(routeSearchOpen || routePaths.length > 0 || selectedPath) ? ' header-search-bar--active' : ''}`}
+          onClick={() => { if (!selectedPath) setRouteSearchOpen((v) => !v); }}
+          aria-label="목적지 검색"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          목적지
+          <span className="header-search-text">
+            {selectedPath ? '경로 안내 중' : routePaths.length > 0 ? '경로 탐색 결과' : '어디로 가시나요?'}
+          </span>
         </button>
         <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
       </header>
