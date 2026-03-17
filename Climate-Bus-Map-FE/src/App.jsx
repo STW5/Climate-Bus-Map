@@ -85,6 +85,10 @@ export default function App() {
   // D-03: 경로 탐색
   const handleRouteSearch = useCallback(async (start, destination) => {
     if (!position) return;
+    // 모바일: route 패널 열릴 때 arrival 패널 닫기
+    setSelectedStation(null);
+    setArrivals([]);
+    setArrivalError(null);
     setRouteLoading(true);
     setRoutePaths([]);
     setSelectedPath(null);
@@ -220,7 +224,7 @@ export default function App() {
             onClose={handleRouteClose}
           />
         )}
-        {!routeSearchOpen && (
+        {!routeSearchOpen && !selectedPath && routePaths.length === 0 && !selectedStation && (
           <ClimateRoutesPanel
             routes={climateRoutes}
             loading={climateLoading}

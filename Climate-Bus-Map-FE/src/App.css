@@ -413,24 +413,24 @@ body {
 
 /* ─── 반응형: 태블릿 / 데스크탑 ─────────────── */
 @media (min-width: 768px) {
-  /* GPS 버튼: 패널이 왼쪽에 있으므로 오른쪽 하단 */
+  /* GPS 버튼: 우측 하단 고정 */
   .gps-btn {
     bottom: 24px;
     right: 20px;
   }
 
-  /* 도착 패널: 바텀 시트 → 좌측 플로팅 패널 */
+  /* 도착 패널: 바텀 시트 → 우측 플로팅 패널 (left 패널과 겹침 없음) */
   .arrival-panel {
     top: 16px;
     bottom: 16px;
-    left: 16px;
-    right: auto;
+    right: 16px;
+    left: auto;
     width: 340px;
     max-height: none;
     border-radius: 16px;
     box-shadow: var(--shadow-lg);
     padding-bottom: 0;
-    transform: translateX(calc(-100% - 24px));
+    transform: translateX(calc(100% + 24px));
   }
 
   .arrival-panel.open {
@@ -510,6 +510,15 @@ body {
   max-width: 190px;
   z-index: 10;
   border: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+  .climate-panel {
+    left: auto;
+    right: 16px;
+    bottom: 24px;
+    max-width: 170px;
+  }
 }
 
 .climate-panel__header {
@@ -613,6 +622,19 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+@media (max-width: 767px) {
+  .route-search-panel {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    transform: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    padding-top: 12px;
+  }
 }
 
 .route-search-header {
@@ -820,34 +842,37 @@ body {
 /* ─── Selected Route Panel ───────────────── */
 .sel-route-panel {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  top: 16px;
+  bottom: 16px;
+  left: 16px;
+  right: auto;
+  width: min(360px, calc(100% - 32px));
   background: var(--bg-card);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   z-index: 150;
   display: flex;
   flex-direction: column;
-  max-height: 72vh;
-  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
-  padding-bottom: var(--safe-bottom);
+  overflow: hidden;
+  animation: slideInLeft 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-@media (min-width: 768px) {
+@keyframes slideInLeft {
+  from { transform: translateX(calc(-100% - 24px)); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 767px) {
   .sel-route-panel {
-    top: 16px;
-    bottom: 16px;
-    left: 16px;
-    right: auto;
-    width: 360px;
-    max-height: none;
-    border-radius: 16px;
-    animation: slideInLeft 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
-  }
-  @keyframes slideInLeft {
-    from { transform: translateX(calc(-100% - 24px)); opacity: 0; }
-    to   { transform: translateX(0); opacity: 1; }
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 75vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+    padding-bottom: var(--safe-bottom);
   }
 }
 
@@ -1083,7 +1108,7 @@ body {
   animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .route-result-panel {
     top: auto;
     bottom: 0;
