@@ -3,8 +3,6 @@ package com.stw.climatebusmapbe.station.service;
 import com.stw.climatebusmapbe.external.busapi.BusApiPort;
 import com.stw.climatebusmapbe.external.busapi.dto.BusArrivalDto;
 import com.stw.climatebusmapbe.external.busapi.dto.NearbyStationDto;
-import com.stw.climatebusmapbe.route.entity.ClimateEligibleRoute;
-import com.stw.climatebusmapbe.route.repository.ClimateEligibleRouteRepository;
 import com.stw.climatebusmapbe.station.dto.ClimateRoutesResponse;
 import com.stw.climatebusmapbe.station.dto.NearbyStationsResponse;
 import com.stw.climatebusmapbe.station.dto.StationDto;
@@ -14,7 +12,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,7 +19,6 @@ import java.util.stream.Collectors;
 public class StationService {
 
     private final BusApiPort busApiPort;
-    private final ClimateEligibleRouteRepository routeRepository;
 
     @Cacheable(value = "nearbyStations", key = "#lat + '_' + #lng + '_' + #radius")
     public NearbyStationsResponse getNearbyStations(double lat, double lng, int radius) {
@@ -41,12 +37,8 @@ public class StationService {
 
         List<NearbyStationDto> stations = busApiPort.getNearbyStations(lng, lat, radius);
 
-        Map<String, ClimateEligibleRoute> eligibleRoutes = routeRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(ClimateEligibleRoute::getRouteId, r -> r));
-
         // 정류소별 도착 버스 조회 → 기후동행 가능 노선 집계 (최대 10개 정류소)
-        Set<String> seenRouteIds = new LinkedHashSet<>();
+        Set<String> seenRouteNos = new LinkedHashSet<>();
         List<ClimateRoutesResponse.RouteDto> climateRoutes = new ArrayList<>();
         Set<String> climateStationIds = new LinkedHashSet<>();
 
@@ -56,13 +48,12 @@ public class StationService {
             try {
                 List<BusArrivalDto> arrivals = busApiPort.getArrivals(stationId);
                 for (BusArrivalDto arrival : arrivals) {
-                    String routeId = arrival.getRouteId();
-                    if (eligibleRoutes.containsKey(routeId)) {
+                    String routeNo = arrival.getRouteNo();
+                    if (isClimateEligible(routeNo)) {
                         climateStationIds.add(stationId);
-                        if (seenRouteIds.add(routeId)) {
-                            ClimateEligibleRoute route = eligibleRoutes.get(routeId);
+                        if (seenRouteNos.add(routeNo)) {
                             climateRoutes.add(new ClimateRoutesResponse.RouteDto(
-                                    routeId, arrival.getRouteNo(), route.getRouteType()
+                                    arrival.getRouteId(), routeNo, inferRouteType(routeNo)
                             ));
                         }
                     }
@@ -73,5 +64,32 @@ public class StationService {
         }
 
         return new ClimateRoutesResponse(climateRoutes, stations.size(), new ArrayList<>(climateStationIds));
+    }
+
+    /**
+     * 노선번호 패턴으로 기후동행카드 사용 가능 여부 판단
+     * - 한글 포함 → 마을버스 ❌
+     * - M/G/A 시작 → 광역·경기버스 ❌
+     * - N + 숫자 → 심야버스 ✅
+     * - 숫자만 → 간선·지선·순환버스 ✅
+     */
+    private boolean isClimateEligible(String routeNo) {
+        if (routeNo == null || routeNo.isBlank()) return false;
+        String no = routeNo.trim();
+        if (no.matches(".*[가-힣].*")) return false;
+        if (no.matches("(?i)^[MGA].*")) return false;
+        if (no.matches("(?i)^N\\d+$")) return true;
+        if (no.matches("^\\d+$")) return true;
+        return false;
+    }
+
+    private String inferRouteType(String routeNo) {
+        if (routeNo == null) return "기타";
+        String no = routeNo.trim();
+        if (no.matches("(?i)^N\\d+$")) return "심야";
+        if (!no.matches("^\\d+$")) return "기타";
+        int num = Integer.parseInt(no);
+        if (num < 100) return "순환";
+        return "간선";
     }
 }
