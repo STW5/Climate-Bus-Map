@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import ClimateBadge from './ClimateBadge';
 
 function SkeletonRow() {
@@ -29,9 +30,20 @@ function EmptyState() {
   );
 }
 
-function ArrivalTime({ sec, primary }) {
-  const min = Math.floor(sec / 60);
-  const s = sec % 60;
+function ArrivalTime({ sec, fetchedAt, primary }) {
+  const [remaining, setRemaining] = useState(sec);
+
+  useEffect(() => {
+    setRemaining(sec);
+    if (!fetchedAt) return;
+    const id = setInterval(() => {
+      setRemaining(Math.max(0, sec - Math.floor((Date.now() - fetchedAt) / 1000)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [sec, fetchedAt]);
+
+  const min = Math.floor(remaining / 60);
+  const s = remaining % 60;
   if (min === 0) {
     return (
       <span className={primary ? 'arrival-first' : 'arrival-second'}>
@@ -93,9 +105,9 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
             <div className="route-left">
               <div className="route-badge" style={routeBadgeStyle(arrival.routeNo)}>{arrival.routeNo}</div>
               <div className="route-times">
-                <ArrivalTime sec={arrival.arrivalSec1} primary />
+                <ArrivalTime sec={arrival.arrivalSec1} fetchedAt={arrival.fetchedAt} primary />
                 {arrival.arrivalSec2 > 0 && (
-                  <ArrivalTime sec={arrival.arrivalSec2} />
+                  <ArrivalTime sec={arrival.arrivalSec2} fetchedAt={arrival.fetchedAt} />
                 )}
               </div>
             </div>

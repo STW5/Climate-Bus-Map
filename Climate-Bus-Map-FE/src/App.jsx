@@ -70,13 +70,27 @@ export default function App() {
     setArrivalLoading(true);
     try {
       const data = await fetchArrivals(station.stationId);
-      setArrivals(data);
+      const fetchedAt = Date.now();
+      setArrivals(data.map(a => ({ ...a, fetchedAt })));
     } catch (e) {
       setArrivalError(e.message);
     } finally {
       setArrivalLoading(false);
     }
   }, []);
+
+  // 30초마다 도착 정보 재조회 (카운트다운 보정)
+  useEffect(() => {
+    if (!selectedStation) return;
+    const id = setInterval(async () => {
+      try {
+        const data = await fetchArrivals(selectedStation.stationId);
+        const fetchedAt = Date.now();
+        setArrivals(data.map(a => ({ ...a, fetchedAt })));
+      } catch { /* silent */ }
+    }, 30000);
+    return () => clearInterval(id);
+  }, [selectedStation]);
 
   const handleClose = useCallback(() => {
     setSelectedStation(null);
