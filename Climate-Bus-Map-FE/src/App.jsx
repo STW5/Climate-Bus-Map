@@ -7,7 +7,7 @@ import RouteSearchPanel from './components/RouteSearchPanel';
 import RouteResultPanel from './components/RouteResultPanel';
 import SelectedRoutePanel from './components/SelectedRoutePanel';
 import { useGeolocation } from './hooks/useGeolocation';
-import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime } from './api/busApi';
+import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
 import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
 import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
@@ -39,6 +39,7 @@ export default function App() {
   const [selectedPath, setSelectedPath] = useState(null);
   const [boardingTimes, setBoardingTimes] = useState([]);
   const [selectedBoardingTime, setSelectedBoardingTime] = useState(null);
+  const [segmentBoardingTimes, setSegmentBoardingTimes] = useState([]);
 
   useEffect(() => {
     if (!position) return;
@@ -144,7 +145,10 @@ export default function App() {
       })
     );
 
-    setSelectedPath({ ...path, subPath: withWalking });
+    const finalPath = { ...path, subPath: withWalking };
+    setSelectedPath(finalPath);
+    // 구간별 실시간 버스 도착 시간 조회 (백그라운드)
+    fetchSegmentBoardingTimes(finalPath.subPath).then(setSegmentBoardingTimes);
   }, [boardingTimes]);
 
   const handleRouteClose = useCallback(() => {
@@ -153,6 +157,7 @@ export default function App() {
     setSelectedPath(null);
     setBoardingTimes([]);
     setSelectedBoardingTime(null);
+    setSegmentBoardingTimes([]);
   }, []);
 
   // D-01: 필터 적용
@@ -220,6 +225,7 @@ export default function App() {
           <SelectedRoutePanel
             path={selectedPath}
             boardingTime={selectedBoardingTime}
+            segmentBoardingTimes={segmentBoardingTimes}
             onBack={() => setSelectedPath(null)}
             onClose={handleRouteClose}
           />

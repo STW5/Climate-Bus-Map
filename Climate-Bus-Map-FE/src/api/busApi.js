@@ -29,12 +29,9 @@ export async function fetchNearbyClimateRoutes(lat, lng, radius = 500) {
  * @param {object[]} subPaths - ODsay subPath 배열
  * @returns {Promise<{arrivalSec: number, routeNo: string}|null>}
  */
-export async function fetchBoardingTime(subPaths) {
-  const firstBus = subPaths.find(sp => sp.trafficType === 2);
-  if (!firstBus) return null;
-
-  const stations = firstBus.passStopList?.stations ?? [];
-  const routeNo = firstBus.lane?.[0]?.busNo;
+async function fetchOneBusArrival(subPath) {
+  const stations = subPath.passStopList?.stations ?? [];
+  const routeNo = subPath.lane?.[0]?.busNo;
   if (!stations.length || !routeNo) return null;
 
   const lat = parseFloat(stations[0].y);
@@ -52,6 +49,20 @@ export async function fetchBoardingTime(subPaths) {
   } catch {
     return null;
   }
+}
+
+// 경로 목록용: 첫 버스 구간의 탑승 대기시간만 조회
+export async function fetchBoardingTime(subPaths) {
+  const firstBus = subPaths.find(sp => sp.trafficType === 2);
+  if (!firstBus) return null;
+  return fetchOneBusArrival(firstBus);
+}
+
+// 상세 뷰용: 모든 버스 구간의 탑승 대기시간 조회 (subPaths 인덱스 기준, 버스 아닌 구간은 null)
+export async function fetchSegmentBoardingTimes(subPaths) {
+  return Promise.all(
+    subPaths.map(sp => sp.trafficType === 2 ? fetchOneBusArrival(sp) : Promise.resolve(null))
+  );
 }
 
 export async function fetchClimateEligibleRouteIds() {

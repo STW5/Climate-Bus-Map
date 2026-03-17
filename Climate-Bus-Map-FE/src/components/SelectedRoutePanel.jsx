@@ -49,7 +49,22 @@ function clockStr(offsetMin) {
   return `${h}:${m}`;
 }
 
-function SegmentDetail({ subPath, startMin }) {
+function ArrivalChip({ boardingTime }) {
+  if (!boardingTime) return null;
+  const min = Math.floor(boardingTime.arrivalSec / 60);
+  const label = min <= 0 ? '곧 도착' : `${min}분 후`;
+  const urgent = min <= 2;
+  return (
+    <span className={`boarding-chip${urgent ? ' boarding-chip--urgent' : ''}`}>
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+      {label}
+    </span>
+  );
+}
+
+function SegmentDetail({ subPath, startMin, boardingTime }) {
   const { trafficType, sectionTime, stationCount, distance, lane = [], passStopList, climateEligible } = subPath;
   const stations = passStopList?.stations ?? [];
   const fromStation = stations[0]?.stationName;
@@ -93,6 +108,7 @@ function SegmentDetail({ subPath, startMin }) {
         <div className="sel-seg__header">
           <span className="sel-seg__badge" style={{ background: `${color}18`, color }}>{routeName}</span>
           <span className="sel-seg__time">{sectionTime}분</span>
+          <ArrivalChip boardingTime={boardingTime} />
           {!climateEligible && <span className="sel-seg__ineligible">기후동행 불가</span>}
         </div>
         {fromStation && (
@@ -114,7 +130,7 @@ function SegmentDetail({ subPath, startMin }) {
   );
 }
 
-export default function SelectedRoutePanel({ path, boardingTime, onBack, onClose }) {
+export default function SelectedRoutePanel({ path, boardingTime, segmentBoardingTimes = [], onBack, onClose }) {
   if (!path) return null;
 
   const subPaths = path.subPath ?? [];
@@ -166,10 +182,15 @@ export default function SelectedRoutePanel({ path, boardingTime, onBack, onClose
       <div className="sel-route-segments">
         {subPaths.reduce((acc, sp, i) => {
           const startMin = i === 0 ? 0 : acc[i - 1].endMin;
-          acc.push({ sp, startMin, endMin: startMin + (sp.sectionTime ?? 0) });
+          acc.push({ sp, i, startMin, endMin: startMin + (sp.sectionTime ?? 0) });
           return acc;
-        }, []).map(({ sp, startMin }, i) => (
-          <SegmentDetail key={i} subPath={sp} startMin={startMin} />
+        }, []).map(({ sp, i, startMin }) => (
+          <SegmentDetail
+            key={i}
+            subPath={sp}
+            startMin={startMin}
+            boardingTime={segmentBoardingTimes[i] ?? null}
+          />
         ))}
       </div>
     </div>
