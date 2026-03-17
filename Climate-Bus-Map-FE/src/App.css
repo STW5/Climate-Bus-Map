@@ -96,42 +96,123 @@ body {
   letter-spacing: -0.2px;
 }
 
-/* ─── Header Search Bar ───────────────────── */
-.header-search-bar {
+/* ─── Header Search ───────────────────────── */
+.header-search-wrapper {
   flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+.header-search-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
+  padding: 9px 12px;
   background: var(--bg-page);
   border: 1.5px solid var(--border);
   border-radius: 999px;
-  cursor: pointer;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-  color: var(--text-muted);
-  min-width: 0;
-  text-align: left;
-}
-
-.header-search-bar:hover {
-  border-color: var(--green-primary);
-  box-shadow: 0 0 0 3px rgba(14,165,233,0.10);
 }
 
 .header-search-bar--active {
   border-color: var(--green-primary);
-  background: #f0f9ff;
-  color: var(--text-primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.10);
 }
 
-.header-search-text {
+.header-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
   font-size: 13px;
   font-weight: 500;
+  color: var(--text-primary);
   letter-spacing: -0.3px;
+  outline: none;
+  min-width: 0;
+}
+
+.header-search-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.header-search-input:disabled {
+  color: var(--text-secondary);
+}
+
+.header-search-clear {
+  width: 20px;
+  height: 20px;
+  background: #d1d5db;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.15s;
+}
+.header-search-clear:hover { background: #9ca3af; }
+
+.header-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  list-style: none;
+  z-index: 300;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.header-suggestion-item {
+  padding: 11px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid #f7f7f7;
+  transition: background 0.1s;
+}
+.header-suggestion-item:last-child { border-bottom: none; }
+.header-suggestion-item:hover { background: var(--bg-page); }
+.header-suggestion-item--loading {
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: default;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-suggestion-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.header-suggestion-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+}
+
+.header-suggestion-addr {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ─── Map wrapper ─────────────────────────── */
