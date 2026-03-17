@@ -37,7 +37,10 @@ function SkeletonCard() {
 const SUBWAY_NAMES = {
   1:'1호선',2:'2호선',3:'3호선',4:'4호선',5:'5호선',
   6:'6호선',7:'7호선',8:'8호선',9:'9호선',
-  100:'경의중앙선',101:'공항철도',104:'경춘선',109:'수인분당선',110:'우이신설선'
+  21:'인천1호선',22:'인천2호선',
+  100:'경의중앙선',101:'공항철도',102:'자기부상철도',
+  104:'경춘선',107:'에버라인',108:'의정부경전철',
+  109:'수인분당선',110:'우이신설선',111:'서해선',112:'신림선',113:'GTX-A',
 };
 
 function segmentColor(subPath) {
@@ -96,7 +99,7 @@ function SegmentRow({ subPath }) {
 
   const isSubway = trafficType === 1;
   const name = isSubway
-    ? (SUBWAY_NAMES[lane[0]?.subwayCode] ?? '지하철')
+    ? (lane[0]?.name ?? SUBWAY_NAMES[lane[0]?.subwayCode] ?? '지하철')
     : (lane[0]?.busNo ?? '버스');
   const eligible = subPath.climateEligible;
 
