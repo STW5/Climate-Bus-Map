@@ -307,7 +307,7 @@ export default function App() {
             onClose={handleRouteClose}
           />
         )}
-        {!routeSearchOpen && !selectedPath && routePaths.length === 0 && !selectedStation && (
+        {!selectedPath && routePaths.length === 0 && !selectedStation && (
           <ClimateRoutesPanel
             routes={climateRoutes}
             loading={climateLoading}
