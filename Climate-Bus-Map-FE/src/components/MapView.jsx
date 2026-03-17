@@ -33,6 +33,16 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     });
     mapRef.current = map;
 
+    // 줌 중 마커 숨기기 → 줌 완료 후 복원 (렌더링 부하 감소)
+    let showTimer = null;
+    map.addListener('zoom_changed', () => {
+      markersRef.current.forEach(m => m.setVisible(false));
+      clearTimeout(showTimer);
+      showTimer = setTimeout(() => {
+        markersRef.current.forEach(m => m.setVisible(true));
+      }, 300);
+    });
+
     return () => {
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current.clear();
