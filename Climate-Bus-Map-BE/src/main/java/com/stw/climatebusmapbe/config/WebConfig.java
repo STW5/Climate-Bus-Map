@@ -12,7 +12,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins(
                         "http://localhost:3000",
-                        "http://stw.iptime.org:3002"
+                        "http://stw.iptime.org:3002",
+                        "https://climatego.duckdns.org"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
