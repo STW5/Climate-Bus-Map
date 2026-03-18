@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: climatego-postgres
+    ports:
+      - "5443:5432"
+    environment:
+      POSTGRES_DB: climate_bus_map
+      POSTGRES_USER: ${DB_USERNAME:-climatebus}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - climatego_db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-climatebus}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./Climate-Bus-Map-BE
+      dockerfile: Dockerfile
+    container_name: climatego-backend
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/climate_bus_map
+      DB_USERNAME: ${DB_USERNAME:-climatebus}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SEOUL_BUS_API_KEY: ${SEOUL_BUS_API_KEY}
+      TMAP_API_KEY: ${TMAP_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./Climate-Bus-Map-FE
+      dockerfile: Dockerfile
+    container_name: climatego-frontend
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  climatego_db:
