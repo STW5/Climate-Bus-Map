@@ -33,11 +33,10 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   const routeMarkersRef = useRef([]);
   const myLocationMarkerRef = useRef(null);
 
-  // 지도 초기화 (SDK 로드 + center 확정 후 1회만 실행)
-  // center dep 포함이지만 mapRef.current 가드로 재생성 방지
+  // 지도 초기화 — center dep 변경 시 cleanup 없이 1회만 실행
+  // cleanup을 반환하지 않으므로 center 변경 시 지도 재생성 없음
   useEffect(() => {
-    if (!tmapReady || !center) return;
-    if (mapRef.current) return; // 이미 초기화됨
+    if (!tmapReady || !center || mapRef.current) return;
 
     const map = new window.Tmapv2.Map('map-container', {
       center: new window.Tmapv2.LatLng(center.lat, center.lng),
@@ -47,16 +46,13 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     });
     mapRef.current = map;
 
-    // 내 위치 마커 최초 생성
     myLocationMarkerRef.current = new window.Tmapv2.Marker({
       position: new window.Tmapv2.LatLng(center.lat, center.lng),
       map,
       icon: makeMyLocationIcon(),
-      iconSize: new window.Tmapv2.Size(24, 24),
       zIndex: 1000,
     });
 
-    // 줌 중 마커 숨기기 → 줌 완료 후 복원 (렌더링 부하 감소)
     let showTimer = null;
     map.addListener('zoom_changed', () => {
       markersRef.current.forEach(m => m.setVisible(false));
@@ -65,7 +61,11 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         markersRef.current.forEach(m => m.setVisible(true));
       }, 300);
     });
+    // cleanup 없음 — center 변경 시 지도 파괴 방지
+  }, [tmapReady, center]);
 
+  // 언마운트 시에만 지도 정리
+  useEffect(() => {
     return () => {
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current.clear();
@@ -73,12 +73,14 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         myLocationMarkerRef.current.setMap(null);
         myLocationMarkerRef.current = null;
       }
-      map.destroy();
-      mapRef.current = null;
+      if (mapRef.current) {
+        mapRef.current.destroy();
+        mapRef.current = null;
+      }
     };
-  }, [tmapReady, center]);
+  }, []);
 
-  // 내 위치 마커 실시간 업데이트 (GPS watchPosition 갱신 시)
+  // 내 위치 마커 실시간 업데이트
   useEffect(() => {
     if (!myLocationMarkerRef.current || !center) return;
     myLocationMarkerRef.current.setPosition(
