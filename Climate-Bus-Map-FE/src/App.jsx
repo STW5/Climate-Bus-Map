@@ -3,6 +3,7 @@ import MapView from './components/MapView';
 import ArrivalPanel from './components/ArrivalPanel';
 import FilterToggle from './components/FilterToggle';
 import ClimateRoutesPanel from './components/ClimateRoutesPanel';
+import FavoritesPanel from './components/FavoritesPanel';
 import RouteResultPanel from './components/RouteResultPanel';
 import SelectedRoutePanel from './components/SelectedRoutePanel';
 import HeaderSearch from './components/HeaderSearch';
@@ -11,6 +12,7 @@ import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoar
 import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
 import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
+import { getFavorites } from './utils/favorites';
 import './App.css';
 
 export default function App() {
@@ -22,6 +24,10 @@ export default function App() {
   const [arrivals, setArrivals] = useState([]);
   const [arrivalLoading, setArrivalLoading] = useState(false);
   const [arrivalError, setArrivalError] = useState(null);
+
+  // 즐겨찾기
+  const [favorites, setFavorites] = useState(getFavorites);
+  const refreshFavorites = useCallback(() => setFavorites(getFavorites()), []);
 
   // D-01: 기후동행 필터
   const [filterActive, setFilterActive] = useState(false);
@@ -249,11 +255,19 @@ export default function App() {
           />
         )}
         {!selectedPath && routePaths.length === 0 && !selectedStation && (
-          <ClimateRoutesPanel
-            routes={climateRoutes}
-            loading={climateLoading}
-            error={climateError}
-          />
+          favorites.length > 0 ? (
+            <FavoritesPanel
+              favorites={favorites}
+              onStationSelect={handleStationSelect}
+              onFavoriteChange={refreshFavorites}
+            />
+          ) : (
+            <ClimateRoutesPanel
+              routes={climateRoutes}
+              loading={climateLoading}
+              error={climateError}
+            />
+          )
         )}
         <ArrivalPanel
           station={selectedStation}
@@ -261,6 +275,7 @@ export default function App() {
           loading={arrivalLoading}
           error={arrivalError}
           onClose={handleClose}
+          onFavoriteChange={refreshFavorites}
         />
       </div>
     </div>

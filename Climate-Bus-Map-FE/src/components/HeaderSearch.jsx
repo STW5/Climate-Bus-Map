@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { searchPlace } from '../api/tmapApi';
+import { getRecentSearches, addRecentSearch, removeRecentSearch } from '../utils/recentSearches';
 
 function SuggestionList({ items, loading, onSelect }) {
   if (!loading && items.length === 0) return null;
@@ -37,6 +38,8 @@ export default function HeaderSearch({ onSearch, onClear, currentPosition, isLoc
   const [destSelected, setDestSelected] = useState(null);
   const [destSuggestions, setDestSuggestions] = useState([]);
   const [destSearching, setDestSearching] = useState(false);
+  const [destFocused, setDestFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState(getRecentSearches);
 
   const depDebounce = useRef(null);
   const destDebounce = useRef(null);
@@ -78,6 +81,9 @@ export default function HeaderSearch({ onSearch, onClear, currentPosition, isLoc
     setDestSelected(place);
     setDestQuery(place.name);
     setDestSuggestions([]);
+    setDestFocused(false);
+    addRecentSearch(place);
+    setRecentSearches(getRecentSearches());
     onSearch(depSelected || currentPosition, place);
   };
 
@@ -160,6 +166,8 @@ export default function HeaderSearch({ onSearch, onClear, currentPosition, isLoc
               value={destQuery}
               autoFocus={!depEditing}
               onChange={e => { setDestQuery(e.target.value); setDestSelected(null); setDepEditing(false); }}
+              onFocus={() => setDestFocused(true)}
+              onBlur={() => setTimeout(() => setDestFocused(false), 150)}
             />
             {destQuery && (
               <button className="header-search-row-clear" onClick={() => { setDestQuery(''); setDestSelected(null); }}>✕</button>
@@ -171,12 +179,38 @@ export default function HeaderSearch({ onSearch, onClear, currentPosition, isLoc
       )}
 
       {/* 자동완성 드롭다운 */}
-      {open && (
+      {open && (activeSuggestions.length > 0 || activeSearching) && (
         <SuggestionList
           items={activeSuggestions}
           loading={activeSearching}
           onSelect={handleActiveSelect}
         />
+      )}
+
+      {/* 최근 검색 드롭다운 */}
+      {open && !depEditing && destFocused && !destQuery && recentSearches.length > 0 && (
+        <ul className="header-suggestions">
+          <li className="header-suggestion-section">최근 검색</li>
+          {recentSearches.map((s, i) => (
+            <li key={i} className="header-suggestion-item" onMouseDown={() => handleDestSelect(s)}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <div className="header-suggestion-text">
+                <span className="header-suggestion-name">{s.name}</span>
+                {s.address && <span className="header-suggestion-addr">{s.address}</span>}
+              </div>
+              <button
+                className="header-suggestion-remove"
+                onMouseDown={e => {
+                  e.stopPropagation();
+                  removeRecentSearch(s.name);
+                  setRecentSearches(getRecentSearches());
+                }}
+              >✕</button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

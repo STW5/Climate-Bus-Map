@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ClimateBadge from './ClimateBadge';
+import { isFavorite, addFavorite, removeFavorite } from '../utils/favorites';
 
 function SkeletonRow() {
   return (
@@ -70,7 +71,24 @@ function routeBadgeStyle(routeNo) {
   return { background: 'var(--green-primary)', color: '#fff' };
 }
 
-export default function ArrivalPanel({ station, arrivals, loading, error, onClose }) {
+export default function ArrivalPanel({ station, arrivals, loading, error, onClose, onFavoriteChange }) {
+  const [favorited, setFavorited] = useState(false);
+
+  useEffect(() => {
+    if (station) setFavorited(isFavorite(station.stationId));
+  }, [station]);
+
+  const handleFavoriteToggle = () => {
+    if (!station) return;
+    if (favorited) {
+      removeFavorite(station.stationId);
+    } else {
+      addFavorite({ stationId: station.stationId, stationName: station.stationName, lat: station.lat, lng: station.lng });
+    }
+    setFavorited(!favorited);
+    onFavoriteChange?.();
+  };
+
   return (
     <div className={`arrival-panel${station ? ' open' : ''}`}>
       <div className="drag-handle">
@@ -81,7 +99,16 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
         <div className="station-info">
           <h2>{station?.stationName ?? ''}</h2>
         </div>
-        <button className="close-btn" onClick={onClose} aria-label="닫기">✕</button>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {station && (
+            <button className="favorite-btn" onClick={handleFavoriteToggle} aria-label="즐겨찾기">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={favorited ? '#f59e0b' : 'none'} stroke={favorited ? '#f59e0b' : 'var(--text-muted)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          )}
+          <button className="close-btn" onClick={onClose} aria-label="닫기">✕</button>
+        </div>
       </div>
 
       <div className="divider" />
