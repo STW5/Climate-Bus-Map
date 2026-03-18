@@ -25,14 +25,15 @@ export function useGeolocation() {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (pos) => setStable({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => {
         setStable(DEFAULT_POSITION);
         setIsFallback(true);
       },
-      { timeout: 5000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
   return { position, isFallback };

@@ -14,16 +14,30 @@ function GpsIcon() {
   );
 }
 
+const makeMyLocationIcon = () => {
+  const svg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">',
+    '<circle cx="12" cy="12" r="10" fill="#1a73e8" opacity="0.2"/>',
+    '<circle cx="12" cy="12" r="6" fill="#1a73e8"/>',
+    '<circle cx="12" cy="12" r="6" fill="none" stroke="white" stroke-width="2"/>',
+    '</svg>',
+  ].join('');
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
+};
+
 export default function MapView({ center, stations, onStationSelect, routePath }) {
   const tmapReady = useTmapReady();
   const mapRef = useRef(null);
   const markersRef = useRef(new Map()); // stationId → marker
   const polylinesRef = useRef([]);
   const routeMarkersRef = useRef([]);
+  const myLocationMarkerRef = useRef(null);
 
-  // 지도 초기화 (SDK 로드 + center 확정 후 1회)
+  // 지도 초기화 (SDK 로드 + center 확정 후 1회만 실행)
+  // center dep 포함이지만 mapRef.current 가드로 재생성 방지
   useEffect(() => {
     if (!tmapReady || !center) return;
+    if (mapRef.current) return; // 이미 초기화됨
 
     const map = new window.Tmapv2.Map('map-container', {
       center: new window.Tmapv2.LatLng(center.lat, center.lng),
@@ -32,6 +46,15 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       zoom: 15,
     });
     mapRef.current = map;
+
+    // 내 위치 마커 최초 생성
+    myLocationMarkerRef.current = new window.Tmapv2.Marker({
+      position: new window.Tmapv2.LatLng(center.lat, center.lng),
+      map,
+      icon: makeMyLocationIcon(),
+      iconSize: new window.Tmapv2.Size(24, 24),
+      zIndex: 1000,
+    });
 
     // 줌 중 마커 숨기기 → 줌 완료 후 복원 (렌더링 부하 감소)
     let showTimer = null;
@@ -46,10 +69,22 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     return () => {
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current.clear();
+      if (myLocationMarkerRef.current) {
+        myLocationMarkerRef.current.setMap(null);
+        myLocationMarkerRef.current = null;
+      }
       map.destroy();
       mapRef.current = null;
     };
   }, [tmapReady, center]);
+
+  // 내 위치 마커 실시간 업데이트 (GPS watchPosition 갱신 시)
+  useEffect(() => {
+    if (!myLocationMarkerRef.current || !center) return;
+    myLocationMarkerRef.current.setPosition(
+      new window.Tmapv2.LatLng(center.lat, center.lng)
+    );
+  }, [center]);
 
   // 마커 표시 (diff: 변경된 것만 추가/제거)
   useEffect(() => {
