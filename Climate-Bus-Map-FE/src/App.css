@@ -142,6 +142,16 @@ body {
   transition: none;
 }
 
+/* peek 상태: 지도 터치가 시트를 통과하도록 (정류장 탭 허용) */
+.draggable-sheet--peek {
+  pointer-events: none;
+}
+
+/* peek 상태에서도 드래그 핸들은 활성 유지 */
+.draggable-sheet--peek .drag-handle {
+  pointer-events: auto;
+}
+
 .sheet-inner {
   flex: 1;
   overflow-y: auto;
@@ -158,6 +168,11 @@ body {
   box-shadow: none !important;
   border-radius: 0 !important;
   padding-bottom: 0 !important;
+}
+
+/* ArrivalPanel 내부 드래그 핸들: 시트 자체 핸들과 중복되므로 숨김 */
+.sheet-inner .arrival-panel .drag-handle {
+  display: none;
 }
 
 .sheet-inner .route-result-panel,

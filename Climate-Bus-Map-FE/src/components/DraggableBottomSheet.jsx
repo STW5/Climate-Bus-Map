@@ -15,6 +15,7 @@ export default function DraggableBottomSheet({
   children,
 }) {
   const sheetRef = useRef(null);
+  const handleRef = useRef(null);
   const scrollRef = useRef(null);
   const touchStartY = useRef(0);
   const touchStartH = useRef(0);
@@ -33,8 +34,7 @@ export default function DraggableBottomSheet({
   useEffect(() => { setLiveH(null); }, [snapIndex]);
 
   const onTouchStart = useCallback((e) => {
-    const handle = sheetRef.current?.querySelector('.drag-handle');
-    const isHandle = handle?.contains(e.target);
+    const isHandle = handleRef.current?.contains(e.target);
     const scroll = scrollRef.current;
     // 핸들이 아니고, 내부 스크롤이 위가 아니면 드래그 시작 안 함
     if (!isHandle && scroll && scroll.scrollTop > 0) return;
@@ -104,16 +104,26 @@ export default function DraggableBottomSheet({
     setLiveH(null);
   }, [liveH, targetH, snapIndex, snapPoints, onClose, onSnapChange]);
 
+  const onTouchCancel = useCallback(() => {
+    isDraggingRef.current = false;
+    setDragging(false);
+    setLiveH(null);
+  }, []);
+
+  // peek 상태(snap 0)에서는 pointer-events: none → 지도 터치 통과
+  const isPeek = snapIndex === 0 && !dragging;
+
   return (
     <div
       ref={sheetRef}
-      className={`draggable-sheet${dragging ? ' draggable-sheet--dragging' : ''}`}
+      className={`draggable-sheet${dragging ? ' draggable-sheet--dragging' : ''}${isPeek ? ' draggable-sheet--peek' : ''}`}
       style={{ height: displayH }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
     >
-      <div className="drag-handle">
+      <div className="drag-handle" ref={handleRef}>
         <div className="drag-handle-bar" />
       </div>
       <div className="sheet-inner" ref={scrollRef}>

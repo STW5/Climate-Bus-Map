@@ -109,8 +109,10 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         position: new window.Tmapv2.LatLng(station.lat, station.lng),
         map: mapRef.current,
         title: station.stationName,
+        clickable: true,
       });
-      marker.addListener('click', () => onStationSelect(station));
+      const handleClick = () => onStationSelect(station);
+      marker.addListener('click', handleClick);
       markersRef.current.set(station.stationId, marker);
     });
   }, [tmapReady, stations, onStationSelect]);
