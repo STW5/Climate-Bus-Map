@@ -685,6 +685,7 @@ body {
 /* Panel body */
 .panel-body {
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 8px;
 }
@@ -729,6 +730,9 @@ body {
   display: flex;
   align-items: center;
   gap: 13px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .route-badge {
@@ -749,6 +753,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .arrival-first {
