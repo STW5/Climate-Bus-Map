@@ -39,6 +39,8 @@ services:
     build:
       context: ./Climate-Bus-Map-FE
       dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ""
     container_name: climatego-frontend
     ports:
       - "3002:80"
