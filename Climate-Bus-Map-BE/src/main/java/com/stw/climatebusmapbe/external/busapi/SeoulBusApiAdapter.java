@@ -45,7 +45,7 @@ public class SeoulBusApiAdapter implements BusApiPort {
     public List<BusArrivalDto> getArrivals(String stationId) {
         log.info("도착 정보 조회: stationId={}", stationId);
 
-        URI uri = UriComponentsBuilder.fromUriString(baseUrl + "/arrive/getLowArrInfoByStId")
+        URI uri = UriComponentsBuilder.fromUriString(baseUrl + "/arrive/getArrInfoByStId")
                 .queryParam("serviceKey", apiKey)
                 .queryParam("stId", stationId)
                 .build(true).toUri();
@@ -78,8 +78,8 @@ public class SeoulBusApiAdapter implements BusApiPort {
                 result.add(new BusArrivalDto(
                         getTagValue("busRouteId", item),
                         getTagValue("rtNm", item),
-                        toInt(getTagValue("exps1", item)),
-                        toInt(getTagValue("exps2", item))
+                        toInt(getTagValue("traTime1", item)),
+                        toInt(getTagValue("traTime2", item))
                 ));
             }
             return result;
