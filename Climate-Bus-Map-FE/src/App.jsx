@@ -6,7 +6,9 @@ import ClimateRoutesPanel from './components/ClimateRoutesPanel';
 import FavoritesPanel from './components/FavoritesPanel';
 import RouteResultPanel from './components/RouteResultPanel';
 import SelectedRoutePanel from './components/SelectedRoutePanel';
-import HeaderSearch from './components/HeaderSearch';
+import DraggableBottomSheet from './components/DraggableBottomSheet';
+import BottomTabBar from './components/BottomTabBar';
+import FloatingSearchBar from './components/FloatingSearchBar';
 import { useGeolocation } from './hooks/useGeolocation';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
 import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
@@ -14,6 +16,18 @@ import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
 import { getFavorites } from './utils/favorites';
 import './App.css';
+
+// 바텀 시트 스냅 포인트 (peek / half / full)
+function useSnapPoints() {
+  return useMemo(() => {
+    const vh = window.innerHeight;
+    return [
+      Math.round(vh * 0.14),  // peek: ~100px on 720px screen
+      Math.round(vh * 0.46),  // half
+      Math.round(vh * 0.84),  // full
+    ];
+  }, []);
+}
 
 export default function App() {
   const { position, isFallback } = useGeolocation();
@@ -25,20 +39,16 @@ export default function App() {
   const [arrivalLoading, setArrivalLoading] = useState(false);
   const [arrivalError, setArrivalError] = useState(null);
 
-  // 즐겨찾기
   const [favorites, setFavorites] = useState(getFavorites);
   const refreshFavorites = useCallback(() => setFavorites(getFavorites()), []);
 
-  // D-01: 기후동행 필터
   const [filterActive, setFilterActive] = useState(false);
 
-  // D-02: 주변 기후동행 노선 패널
   const [climateRoutes, setClimateRoutes] = useState([]);
   const [climateStationIds, setClimateStationIds] = useState(new Set());
   const [climateLoading, setClimateLoading] = useState(false);
   const [climateError, setClimateError] = useState(null);
 
-  // D-03: 경로 탐색
   const [routeLoading, setRouteLoading] = useState(false);
   const [routePaths, setRoutePaths] = useState([]);
   const [selectedPath, setSelectedPath] = useState(null);
@@ -47,7 +57,15 @@ export default function App() {
   const [segmentBoardingTimes, setSegmentBoardingTimes] = useState([]);
   const selectedPathRef = useRef(null);
 
+  // 모바일 UX: 탭 + 바텀 시트 스냅
+  const [activeTab, setActiveTab] = useState('nearby');
+  const [sheetSnap, setSheetSnap] = useState(0); // 0=peek, 1=half, 2=full
+  const snapPoints = useSnapPoints();
 
+  // 탭바 숨김: 경로 결과/선택 중
+  const tabBarHidden = !!selectedPath || routePaths.length > 0 || routeLoading;
+
+  // ── 데이터 페칭 ──────────────────────────────────
   useEffect(() => {
     if (!position) return;
     setStationsError(null);
@@ -69,12 +87,13 @@ export default function App() {
       .finally(() => setClimateLoading(false));
   }, [position]);
 
-
+  // ── 정류장 선택 ──────────────────────────────────
   const handleStationSelect = useCallback(async (station) => {
     setSelectedStation(station);
     setArrivals([]);
     setArrivalError(null);
     setArrivalLoading(true);
+    setSheetSnap(1); // half로 열기
     try {
       const data = await fetchArrivals(station.stationId);
       const fetchedAt = Date.now();
@@ -86,7 +105,7 @@ export default function App() {
     }
   }, []);
 
-  // 30초마다 도착 정보 재조회 (카운트다운 보정)
+  // 30초마다 도착 정보 재조회
   useEffect(() => {
     if (!selectedStation) return;
     const id = setInterval(async () => {
@@ -99,16 +118,16 @@ export default function App() {
     return () => clearInterval(id);
   }, [selectedStation]);
 
-  const handleClose = useCallback(() => {
+  const handleStationClose = useCallback(() => {
     setSelectedStation(null);
     setArrivals([]);
     setArrivalError(null);
+    setSheetSnap(0); // peek으로 복귀
   }, []);
 
-  // D-03: 경로 탐색
+  // ── 경로 탐색 ──────────────────────────────────
   const handleRouteSearch = useCallback(async (start, destination) => {
     if (!position) return;
-    // 모바일: route 패널 열릴 때 arrival 패널 닫기
     setSelectedStation(null);
     setArrivals([]);
     setArrivalError(null);
@@ -116,6 +135,7 @@ export default function App() {
     setRoutePaths([]);
     setSelectedPath(null);
     setBoardingTimes([]);
+    setSheetSnap(1);
     try {
       const paths = await searchTransitRoute(start || position, destination);
       const actualStart = start || position;
@@ -126,7 +146,6 @@ export default function App() {
         subPath: getSubPathClimateFlags(path.subPath ?? []),
       }));
       setRoutePaths(tagged);
-      // 각 경로의 첫 버스 탑승 대기시간 병렬 조회
       Promise.all(tagged.map(p => fetchBoardingTime(p.subPath ?? []))).then(setBoardingTimes);
     } catch (e) {
       alert(e.message);
@@ -137,10 +156,8 @@ export default function App() {
 
   const handleSelectPath = useCallback(async (path, pathIndex) => {
     setSelectedBoardingTime(boardingTimes[pathIndex] ?? null);
-    // 1. 대중교통 구간: loadLane으로 실제 도형 조회
     const withLane = await loadLaneForPath(path.info?.mapObj, path.subPath ?? []);
 
-    // 이웃 구간의 첫/끝 좌표 추출 헬퍼
     const segCoord = (sp, last = false) => {
       if (!sp) return null;
       if (sp.graphPos?.length) {
@@ -155,7 +172,6 @@ export default function App() {
       return null;
     };
 
-    // 2. 도보 구간: 이웃 대중교통 구간 끝점으로 T-Map 보행자 경로 조회 (병렬)
     const withWalking = await Promise.all(
       withLane.map(async (sp, i) => {
         if (sp.trafficType !== 3) return sp;
@@ -170,7 +186,7 @@ export default function App() {
     const finalPath = { ...path, subPath: withWalking };
     setSelectedPath(finalPath);
     selectedPathRef.current = finalPath;
-    // 구간별 실시간 버스 도착 시간 조회 (백그라운드)
+    setSheetSnap(0); // 지도 보기 우선 (peek)
     fetchSegmentBoardingTimes(finalPath.subPath).then(setSegmentBoardingTimes);
   }, [boardingTimes]);
 
@@ -192,33 +208,98 @@ export default function App() {
     setBoardingTimes([]);
     setSelectedBoardingTime(null);
     setSegmentBoardingTimes([]);
+    setSheetSnap(0);
   }, []);
 
-  // D-01: 필터 적용
+  // ── 탭 네비게이션 ──────────────────────────────
+  const handleTabChange = useCallback((tab) => {
+    if (tab === activeTab) {
+      // 같은 탭 재클릭: peek ↔ half 토글
+      setSheetSnap(prev => prev === 0 ? 1 : 0);
+    } else {
+      setActiveTab(tab);
+      if (tab !== 'route') {
+        setSheetSnap(1); // half로 열기
+      } else {
+        setSheetSnap(0); // 경로 탭: 지도 보이게
+      }
+    }
+  }, [activeTab]);
+
+  const handleSheetClose = useCallback(() => {
+    setSheetSnap(0);
+  }, []);
+
+  // ── 필터 ──────────────────────────────────────
   const displayedStations = useMemo(() => {
     if (!filterActive) return stations;
     return stations.filter((s) => climateStationIds.has(s.stationId));
   }, [filterActive, stations, climateStationIds]);
 
+  // ── 바텀 시트 컨텐츠 결정 ──────────────────────
+  const sheetContent = useMemo(() => {
+    if (selectedPath) {
+      return (
+        <SelectedRoutePanel
+          path={selectedPath}
+          boardingTime={selectedBoardingTime}
+          segmentBoardingTimes={segmentBoardingTimes}
+          onBack={() => { setSelectedPath(null); setSheetSnap(1); }}
+          onClose={handleRouteClose}
+        />
+      );
+    }
+    if (routePaths.length > 0 || routeLoading) {
+      return (
+        <RouteResultPanel
+          paths={routePaths}
+          loading={routeLoading}
+          boardingTimes={boardingTimes}
+          onSelectPath={handleSelectPath}
+          selectedPath={selectedPath}
+          onClose={() => { setRoutePaths([]); setSelectedPath(null); setBoardingTimes([]); setSheetSnap(0); }}
+        />
+      );
+    }
+    if (selectedStation) {
+      return (
+        <ArrivalPanel
+          station={selectedStation}
+          arrivals={arrivals}
+          loading={arrivalLoading}
+          error={arrivalError}
+          onClose={handleStationClose}
+          onFavoriteChange={refreshFavorites}
+        />
+      );
+    }
+    if (activeTab === 'favorites') {
+      return (
+        <FavoritesPanel
+          favorites={favorites}
+          onStationSelect={handleStationSelect}
+          onFavoriteChange={refreshFavorites}
+        />
+      );
+    }
+    return (
+      <ClimateRoutesPanel
+        routes={climateRoutes}
+        loading={climateLoading}
+        error={climateError}
+      />
+    );
+  }, [
+    selectedPath, routePaths, routeLoading, selectedStation, activeTab, favorites,
+    arrivals, arrivalLoading, arrivalError, climateRoutes, climateLoading, climateError,
+    boardingTimes, selectedBoardingTime, segmentBoardingTimes,
+    handleRouteClose, handleStationClose, handleSelectPath, handleStationSelect, refreshFavorites,
+  ]);
+
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="header-logo">
-          <div className="header-icon">🚌</div>
-          <div>
-            <span className="header-brand">ClimateGo</span>
-            {isFallback && <p className="fallback-notice">서울시청 기준</p>}
-          </div>
-        </div>
-        <HeaderSearch
-          onSearch={handleRouteSearch}
-          onClear={handleRouteClose}
-          currentPosition={position}
-          isLocked={!!selectedPath}
-        />
-        <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
-      </header>
-      <div className="map-wrapper">
+      {/* ── 전체화면 지도 ── */}
+      <div className="map-layer">
         {position ? (
           <MapView
             center={position}
@@ -232,52 +313,44 @@ export default function App() {
             위치 정보를 가져오는 중...
           </div>
         )}
-        {stationsError && (
-          <div className="stations-error">정류장 로드 실패: {stationsError}</div>
-        )}
-        {(routePaths.length > 0 || routeLoading) && !selectedPath && (
-          <RouteResultPanel
-            paths={routePaths}
-            loading={routeLoading}
-            boardingTimes={boardingTimes}
-            onSelectPath={handleSelectPath}
-            selectedPath={selectedPath}
-            onClose={() => { setRoutePaths([]); setSelectedPath(null); setBoardingTimes([]); }}
-          />
-        )}
-        {selectedPath && (
-          <SelectedRoutePanel
-            path={selectedPath}
-            boardingTime={selectedBoardingTime}
-            segmentBoardingTimes={segmentBoardingTimes}
-            onBack={() => setSelectedPath(null)}
-            onClose={handleRouteClose}
-          />
-        )}
-        {!selectedPath && routePaths.length === 0 && !selectedStation && (
-          favorites.length > 0 ? (
-            <FavoritesPanel
-              favorites={favorites}
-              onStationSelect={handleStationSelect}
-              onFavoriteChange={refreshFavorites}
-            />
-          ) : (
-            <ClimateRoutesPanel
-              routes={climateRoutes}
-              loading={climateLoading}
-              error={climateError}
-            />
-          )
-        )}
-        <ArrivalPanel
-          station={selectedStation}
-          arrivals={arrivals}
-          loading={arrivalLoading}
-          error={arrivalError}
-          onClose={handleClose}
-          onFavoriteChange={refreshFavorites}
-        />
       </div>
+
+      {/* ── Floating 검색바 ── */}
+      <FloatingSearchBar
+        forceOpen={activeTab === 'route' && !selectedPath && !routePaths.length}
+        onSearch={handleRouteSearch}
+        onClear={handleRouteClose}
+        currentPosition={position}
+        isLocked={!!selectedPath}
+        isFallback={isFallback}
+      />
+
+      {/* ── 지도 우측 FAB (필터 + GPS는 MapView 내부) ── */}
+      <div className={`map-fab-group${tabBarHidden ? ' map-fab-group--route' : ''}`}>
+        <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
+      </div>
+
+      {/* ── 에러 토스트 ── */}
+      {stationsError && (
+        <div className="stations-error">정류장 로드 실패: {stationsError}</div>
+      )}
+
+      {/* ── 드래그 바텀 시트 ── */}
+      <DraggableBottomSheet
+        snapPoints={snapPoints}
+        snapIndex={sheetSnap}
+        onSnapChange={setSheetSnap}
+        onClose={handleSheetClose}
+      >
+        {sheetContent}
+      </DraggableBottomSheet>
+
+      {/* ── 하단 탭 네비게이션 ── */}
+      <BottomTabBar
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        hidden={tabBarHidden}
+      />
     </div>
   );
 }

@@ -45,23 +45,200 @@ body {
 
 /* ─── Layout ──────────────────────────────── */
 .app {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   height: 100vh;
   height: 100dvh;
+  overflow: hidden;
 }
 
-/* ─── Header ─────────────────────────────── */
-.app-header {
+/* 전체화면 지도 레이어 */
+.map-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ─── Floating 검색바 ─────────────────────── */
+.floating-search-bar {
+  position: absolute;
+  top: calc(var(--safe-top) + 12px);
+  left: 12px;
+  right: 12px;
+  z-index: 100;
+}
+
+.floating-search-collapsed {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 12px 14px;
   background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  z-index: 20;
-  padding: calc(10px + var(--safe-top)) calc(12px + var(--safe-right)) 10px calc(12px + var(--safe-left));
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  text-align: left;
+  touch-action: manipulation;
+  transition: box-shadow 0.15s;
 }
+
+.floating-search-collapsed:active {
+  box-shadow: var(--shadow-sm);
+}
+
+.floating-search-collapsed--active {
+  border: 1.5px solid var(--green-primary);
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.10), var(--shadow-md);
+}
+
+.floating-search-expanded {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1.5px solid var(--green-primary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.10), var(--shadow-md);
+  overflow: visible;
+  position: relative;
+  padding-right: 32px;
+}
+
+/* ─── 지도 FAB 그룹 ─────────────────────── */
+.map-fab-group {
+  position: absolute;
+  right: 14px;
+  bottom: calc(56px + var(--safe-bottom) + 80px); /* 탭바 + 여유 */
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: bottom 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.map-fab-group--route {
+  bottom: calc(80px); /* 탭바 숨김 시 */
+}
+
+/* ─── Draggable Bottom Sheet ─────────────── */
+.draggable-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.09);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: height 300ms cubic-bezier(0.32, 0.72, 0, 1);
+  /* 탭바 높이만큼 올림 */
+  padding-bottom: calc(56px + var(--safe-bottom));
+  overflow: hidden;
+}
+
+.draggable-sheet--dragging {
+  transition: none;
+}
+
+.sheet-inner {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 시트 내부 패널: 고유 position 제거 */
+.sheet-inner .arrival-panel,
+.sheet-inner .arrival-panel.open {
+  position: static !important;
+  transform: none !important;
+  max-height: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.sheet-inner .route-result-panel,
+.sheet-inner .route-result-panel--animate {
+  position: static !important;
+  animation: none !important;
+  max-height: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+}
+
+.sheet-inner .sel-route-panel {
+  position: static !important;
+  animation: none !important;
+  max-height: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.sheet-inner .climate-panel {
+  position: static !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  max-width: none !important;
+  padding: 16px;
+}
+
+.sheet-inner .climate-routes-panel {
+  position: static !important;
+  box-shadow: none !important;
+  padding: 16px;
+}
+
+/* ─── Bottom Tab Bar ─────────────────────── */
+.bottom-tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(56px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 200;
+  box-shadow: 0 -1px 8px rgba(0,0,0,0.06);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.bottom-tab-bar--hidden {
+  transform: translateY(100%);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  touch-action: manipulation;
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.tab-item--active {
+  color: var(--green-primary);
+}
+
+/* ─── GPS 버튼 (MapView 내부) ─────────────── */
 
 .header-logo {
   display: flex;
@@ -327,7 +504,7 @@ body {
 .gps-btn {
   position: absolute;
   right: 14px;
-  bottom: 90px;   /* 모바일: 패널 닫힌 상태 기준 */
+  bottom: calc(56px + var(--safe-bottom) + 24px); /* 탭바 위 */
   z-index: 50;
   width: 44px;
   height: 44px;
@@ -637,24 +814,48 @@ body {
     right: 20px;
   }
 
-  /* 도착 패널: 바텀 시트 → 우측 플로팅 패널 (left 패널과 겹침 없음) */
-  .arrival-panel {
+  /* 탭바 숨김 */
+  .bottom-tab-bar { display: none; }
+
+  /* 검색바 → 데스크탑에서 static header처럼 */
+  .floating-search-bar {
+    top: calc(var(--safe-top) + 16px);
+    left: 16px;
+    right: 16px;
+  }
+
+  /* 바텀 시트 → 우측 사이드 패널 */
+  .draggable-sheet {
     top: 16px;
     bottom: 16px;
     right: 16px;
     left: auto;
-    width: 340px;
-    max-height: none;
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
+    width: 360px;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-lg) !important;
+    height: calc(100% - 32px) !important; /* JS 높이 제어 무시 */
     padding-bottom: 0;
-    transform: translateX(calc(100% + 24px));
+    transition: none;
+    transform: none;
+    overflow: hidden;
   }
 
-  .arrival-panel.open {
-    transform: translateX(0);
+  .draggable-sheet .drag-handle { display: none; }
+
+  /* FAB 그룹: 데스크탑 우측 하단 */
+  .map-fab-group {
+    bottom: 80px;
+    right: 20px;
   }
 
+  /* 시트 내 패널 오버라이드 해제 (데스크탑에서는 시트 안에서도 자연스럽게) */
+  .sheet-inner .arrival-panel,
+  .sheet-inner .route-result-panel,
+  .sheet-inner .sel-route-panel {
+    height: 100% !important;
+  }
+
+  /* 도착 패널 CSS는 이제 시트 안에서만 쓰이므로 데스크탑에서도 override */
   .drag-handle {
     display: none;
   }
@@ -1626,4 +1827,42 @@ body {
   font-weight: 700;
   color: var(--text-secondary);
   padding: 0 4px 8px;
+}
+
+/* ── 즐겨찾기 패널 (탭 컨텐츠로 사용) ── */
+.climate-routes-panel {
+  padding: 16px;
+}
+
+.climate-routes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.climate-route-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.1s;
+  border-radius: var(--radius-sm);
+}
+
+.climate-route-item:last-child {
+  border-bottom: none;
+}
+
+.climate-route-item:active {
+  background: var(--bg-page);
+}
+
+.climate-route-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
 }
