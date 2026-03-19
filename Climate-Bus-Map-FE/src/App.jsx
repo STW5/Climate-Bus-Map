@@ -218,6 +218,16 @@ export default function App() {
     setSheetSnap(0);
   }, []);
 
+  // nearby 탭에 보여줄 콘텐츠가 있는지 (로딩 중 / 한도초과 / 데이터 있음)
+  const hasClimateContent = climateLoading || climateApiLimitExceeded || climateRoutes.length > 0;
+
+  // 데이터 로드 완료 후 빈 상태면 시트 자동으로 peek으로 복귀
+  useEffect(() => {
+    if (!climateLoading && !hasClimateContent && activeTab === 'nearby' && !selectedStation && !selectedPath && routePaths.length === 0) {
+      setSheetSnap(0);
+    }
+  }, [climateLoading, hasClimateContent, activeTab, selectedStation, selectedPath, routePaths]);
+
   // ── 탭 네비게이션 ──────────────────────────────
   const handleTabChange = useCallback((tab) => {
     if (tab === activeTab) {
@@ -225,13 +235,15 @@ export default function App() {
       setSheetSnap(prev => prev === 0 ? 1 : 0);
     } else {
       setActiveTab(tab);
-      if (tab !== 'route') {
-        setSheetSnap(1); // half로 열기
-      } else {
+      if (tab === 'route') {
         setSheetSnap(0); // 경로 탭: 지도 보이게
+      } else if (tab === 'nearby') {
+        setSheetSnap(hasClimateContent ? 1 : 0); // 콘텐츠 없으면 peek 유지
+      } else {
+        setSheetSnap(1); // favorites 등
       }
     }
-  }, [activeTab]);
+  }, [activeTab, hasClimateContent]);
 
   const handleSheetClose = useCallback(() => {
     setSheetSnap(0);
