@@ -12,6 +12,7 @@ export default function DraggableBottomSheet({
   snapIndex = 1,
   onSnapChange,
   onClose,
+  hidden = false,
   children,
 }) {
   const sheetRef = useRef(null);
@@ -116,8 +117,8 @@ export default function DraggableBottomSheet({
   return (
     <div
       ref={sheetRef}
-      className={`draggable-sheet${dragging ? ' draggable-sheet--dragging' : ''}${isPeek ? ' draggable-sheet--peek' : ''}`}
-      style={{ height: displayH }}
+      className={`draggable-sheet${dragging ? ' draggable-sheet--dragging' : ''}${isPeek ? ' draggable-sheet--peek' : ''}${hidden ? ' draggable-sheet--hidden' : ''}`}
+      style={{ height: hidden ? 0 : displayH }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

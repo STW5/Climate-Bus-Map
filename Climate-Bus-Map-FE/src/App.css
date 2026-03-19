@@ -157,6 +157,7 @@ body {
 .sheet-inner {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
@@ -720,6 +721,7 @@ body {
   justify-content: space-between;
   padding: 13px 18px;
   min-height: 62px;
+  overflow: hidden;
 }
 
 .arrival-item + .arrival-item {
@@ -737,6 +739,7 @@ body {
 
 .route-badge {
   min-width: 52px;
+  max-width: 88px;
   padding: 6px 10px;
   background: var(--green-primary);
   color: #fff;
@@ -747,6 +750,9 @@ body {
   letter-spacing: -0.4px;
   line-height: 1.4;
   flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .route-times {
@@ -890,6 +896,11 @@ body {
   .arrival-panel {
     width: 380px;
   }
+}
+
+/* 콘텐츠 없을 때 시트 완전 숨김 (데스크탑 height:auto 포함) */
+.draggable-sheet--hidden {
+  display: none !important;
 }
 
 /* ─── Filter Toggle (D-01) ───────────────── */

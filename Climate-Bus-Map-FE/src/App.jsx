@@ -365,6 +365,7 @@ export default function App() {
         snapIndex={sheetSnap}
         onSnapChange={setSheetSnap}
         onClose={handleSheetClose}
+        hidden={!hasClimateContent && activeTab === 'nearby' && !selectedStation && !selectedPath && routePaths.length === 0 && !routeLoading}
       >
         {sheetContent}
       </DraggableBottomSheet>
