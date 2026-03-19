@@ -60,6 +60,7 @@ export default function App() {
   // 모바일 UX: 탭 + 바텀 시트 스냅
   const [activeTab, setActiveTab] = useState('nearby');
   const [sheetSnap, setSheetSnap] = useState(0); // 0=peek, 1=half, 2=full
+  const [searchOpen, setSearchOpen] = useState(false);
   const snapPoints = useSnapPoints();
 
   // 탭바 숨김: 경로 결과/선택 중
@@ -297,7 +298,7 @@ export default function App() {
   ]);
 
   return (
-    <div className="app">
+    <div className={`app${searchOpen ? ' app--search-open' : ''}`}>
       {/* ── 전체화면 지도 ── */}
       <div className="map-layer">
         {position ? (
@@ -323,6 +324,10 @@ export default function App() {
         currentPosition={position}
         isLocked={!!selectedPath}
         isFallback={isFallback}
+        onOpenChange={(isOpen) => {
+          setSearchOpen(isOpen);
+          if (isOpen) setSheetSnap(0); // 모바일: 검색 시 시트 접기
+        }}
       />
 
       {/* ── 지도 우측 FAB (필터 + GPS는 MapView 내부) ── */}

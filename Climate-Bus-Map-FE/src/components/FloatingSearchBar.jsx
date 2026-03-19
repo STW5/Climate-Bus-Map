@@ -38,6 +38,7 @@ export default function FloatingSearchBar({
   currentPosition,
   isLocked,
   isFallback,
+  onOpenChange,
 }) {
   const [open, setOpen] = useState(false);
   const [depQuery, setDepQuery] = useState('');
@@ -63,6 +64,11 @@ export default function FloatingSearchBar({
       setOpen(false);
     }
   }, [forceOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 부모에게 확장 상태 알림
+  useEffect(() => {
+    onOpenChange?.(open || !!forceOpen);
+  }, [open, forceOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 출발지 검색
   useEffect(() => {

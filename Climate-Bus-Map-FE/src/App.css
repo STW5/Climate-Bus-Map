@@ -820,7 +820,8 @@ body {
 
   /* 바텀 시트 → 좌측 사이드 패널 (검색바 아래) */
   .draggable-sheet {
-    top: 76px;          /* 검색바 높이(~48px) + 상하 여백 */
+    top: 76px;          /* 검색바 축약 높이(~48px) + 상하 여백 */
+    transition: top 0.2s ease;
     bottom: 16px;
     left: 16px;
     right: auto;
@@ -836,6 +837,11 @@ body {
   }
 
   .draggable-sheet .drag-handle { display: none; }
+
+  /* 검색바 확장 시 시트 아래로 밀기 */
+  .app--search-open .draggable-sheet {
+    top: 132px;         /* 16px top + ~108px 확장 검색바 + 8px gap */
+  }
 
   /* FAB 그룹: 지도 우측 */
   .map-fab-group {
