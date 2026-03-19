@@ -192,7 +192,6 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         title: station.stationName,
         icon: makeBusStopIcon(),
         iconSize: new window.Tmapv2.Size(26, 26),
-        iconAnchor: new window.Tmapv2.Point(13, 13),
       });
       // 데스크탑 마우스 클릭 (마커 클릭 시 map click 이벤트 미전파 대응)
       marker.addListener('click', () => onStationSelectRef.current(station));
