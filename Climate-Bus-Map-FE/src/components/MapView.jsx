@@ -123,9 +123,9 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       } catch { /* ignore */ }
     };
 
-    mapEl.addEventListener('touchstart', onTS, { passive: true });
-    mapEl.addEventListener('touchmove', onTM,  { passive: true });
-    mapEl.addEventListener('touchend',   onTE,  { passive: true });
+    mapEl.addEventListener('touchstart', onTS, { passive: true, capture: true });
+    mapEl.addEventListener('touchmove', onTM,  { passive: true, capture: true });
+    mapEl.addEventListener('touchend',   onTE,  { passive: true, capture: true });
     touchListenersRef.current = { mapEl, onTS, onTM, onTE };
   }, [tmapReady]);  // map 초기화 후 1회만 실행
 
@@ -134,9 +134,9 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     return () => {
       if (touchListenersRef.current) {
         const { mapEl, onTS, onTM, onTE } = touchListenersRef.current;
-        mapEl.removeEventListener('touchstart', onTS);
-        mapEl.removeEventListener('touchmove',  onTM);
-        mapEl.removeEventListener('touchend',   onTE);
+        mapEl.removeEventListener('touchstart', onTS, { capture: true });
+        mapEl.removeEventListener('touchmove',  onTM, { capture: true });
+        mapEl.removeEventListener('touchend',   onTE, { capture: true });
       }
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current.clear();
