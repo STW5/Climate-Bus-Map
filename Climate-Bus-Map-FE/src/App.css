@@ -171,6 +171,7 @@ body {
   box-shadow: none !important;
   border-radius: 0 !important;
   padding-bottom: 0 !important;
+  width: 100% !important;
 }
 
 /* ArrivalPanel 내부 드래그 핸들: 시트 자체 핸들과 중복되므로 숨김 */
