@@ -84,9 +84,60 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     // cleanup 없음 — center 변경 시 지도 파괴 방지
   }, [tmapReady, center]);
 
+  // 모바일 touchend → 가장 가까운 정류장 선택 (TMap click 이벤트 모바일 미지원 대응)
+  const touchListenersRef = useRef(null);
+  useEffect(() => {
+    if (!tmapReady || !mapRef.current) return;
+    const mapEl = document.getElementById('map-container');
+    if (!mapEl || touchListenersRef.current) return;
+
+    let touchStartX = 0, touchStartY = 0, moved = false;
+    const onTS = (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      moved = false;
+    };
+    const onTM = (e) => {
+      if (Math.abs(e.touches[0].clientX - touchStartX) > 10 ||
+          Math.abs(e.touches[0].clientY - touchStartY) > 10) moved = true;
+    };
+    const onTE = (e) => {
+      if (moved) return;
+      const touch = e.changedTouches[0];
+      const rect = mapEl.getBoundingClientRect();
+      const px = touch.clientX - rect.left;
+      const py = touch.clientY - rect.top;
+      try {
+        const bounds = mapRef.current.getBounds();
+        const ne = bounds.getNE();
+        const sw = bounds.getSW();
+        const lat = ne.lat() - (py / rect.height) * (ne.lat() - sw.lat());
+        const lng = sw.lng() + (px / rect.width) * (ne.lng() - sw.lng());
+        const THRESHOLD = 0.0004;
+        let closest = null, minDist = THRESHOLD;
+        stationsRef.current.forEach((s) => {
+          const d = Math.hypot(lat - s.lat, lng - s.lng);
+          if (d < minDist) { minDist = d; closest = s; }
+        });
+        if (closest) onStationSelectRef.current(closest);
+      } catch { /* ignore */ }
+    };
+
+    mapEl.addEventListener('touchstart', onTS, { passive: true });
+    mapEl.addEventListener('touchmove', onTM,  { passive: true });
+    mapEl.addEventListener('touchend',   onTE,  { passive: true });
+    touchListenersRef.current = { mapEl, onTS, onTM, onTE };
+  }, [tmapReady]);  // map 초기화 후 1회만 실행
+
   // 언마운트 시에만 지도 정리
   useEffect(() => {
     return () => {
+      if (touchListenersRef.current) {
+        const { mapEl, onTS, onTM, onTE } = touchListenersRef.current;
+        mapEl.removeEventListener('touchstart', onTS);
+        mapEl.removeEventListener('touchmove',  onTM);
+        mapEl.removeEventListener('touchend',   onTE);
+      }
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current.clear();
       if (myLocationMarkerRef.current) {

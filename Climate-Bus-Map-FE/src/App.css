@@ -136,6 +136,8 @@ body {
   /* 탭바 높이만큼 올림 */
   padding-bottom: calc(56px + var(--safe-bottom));
   overflow: hidden;
+  /* 검색바와 겹치지 않도록 최대 높이 제한 */
+  max-height: calc(100dvh - var(--safe-top) - 68px);
 }
 
 .draggable-sheet--dragging {
@@ -175,25 +177,6 @@ body {
   display: none;
 }
 
-.sheet-inner .route-result-panel,
-.sheet-inner .route-result-panel--animate {
-  position: static !important;
-  animation: none !important;
-  max-height: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  width: 100% !important;
-}
-
-.sheet-inner .sel-route-panel {
-  position: static !important;
-  animation: none !important;
-  max-height: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  width: 100% !important;
-  height: auto !important;
-}
 
 .sheet-inner .climate-panel {
   position: static !important;
@@ -874,9 +857,7 @@ body {
   }
 
   /* 시트 내 패널: 데스크탑에서 전체 높이 채우기 */
-  .sheet-inner .arrival-panel,
-  .sheet-inner .route-result-panel,
-  .sheet-inner .sel-route-panel {
+  .sheet-inner .arrival-panel {
     height: 100% !important;
   }
 
@@ -1284,39 +1265,13 @@ body {
 
 /* ─── Selected Route Panel ───────────────── */
 .sel-route-panel {
-  position: absolute;
-  top: 16px;
-  bottom: 16px;
-  left: 16px;
-  right: auto;
-  width: min(360px, calc(100% - 32px));
+  position: static;
+  width: 100%;
   background: var(--bg-card);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-  z-index: 150;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideInLeft 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-
-@keyframes slideInLeft {
-  from { transform: translateX(calc(-100% - 24px)); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
-}
-
-@media (max-width: 767px) {
-  .sel-route-panel {
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-height: 75vh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
-    padding-bottom: var(--safe-bottom);
-  }
+  flex: 1;
 }
 
 .sel-route-header {
@@ -1552,34 +1507,17 @@ body {
 }
 
 .route-result-panel {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: min(360px, calc(100% - 32px));
+  position: static;
+  width: 100%;
   background: var(--bg-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  z-index: 150;
   display: flex;
   flex-direction: column;
-  max-height: calc(100% - 28px);
   overflow: hidden;
+  flex: 1;
 }
 
 .route-result-panel--animate {
-  animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-
-@media (max-width: 767px) {
-  .route-result-panel {
-    top: auto;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    width: 100%;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    max-height: 60vh;
-  }
+  animation: none;
 }
 
 .route-result-header {
