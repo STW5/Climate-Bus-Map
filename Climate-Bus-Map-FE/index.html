@@ -12,6 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="ClimateGo" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <!-- TMap SDK가 HTTP 타일 URL을 사용하므로 HTTPS로 자동 업그레이드 -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <title>ClimateGo — 기후동행카드 버스 지도</title>
     <!-- T-Map SDK는 useTmapReady 훅에서 환경변수(VITE_TMAP_API_KEY)로 동적 로드 -->
   </head>
