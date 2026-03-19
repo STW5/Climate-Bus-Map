@@ -6,11 +6,22 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
 public class ClimateRoutesResponse {
-    private List<RouteDto> routes;
-    private int stationCount;
-    private List<String> climateStationIds;
+    private final List<RouteDto> routes;
+    private final int stationCount;
+    private final List<String> climateStationIds;
+    private final boolean apiLimitExceeded;
+
+    public ClimateRoutesResponse(List<RouteDto> routes, int stationCount, List<String> climateStationIds) {
+        this(routes, stationCount, climateStationIds, false);
+    }
+
+    public ClimateRoutesResponse(List<RouteDto> routes, int stationCount, List<String> climateStationIds, boolean apiLimitExceeded) {
+        this.routes = routes;
+        this.stationCount = stationCount;
+        this.climateStationIds = climateStationIds;
+        this.apiLimitExceeded = apiLimitExceeded;
+    }
 
     @Getter
     @AllArgsConstructor

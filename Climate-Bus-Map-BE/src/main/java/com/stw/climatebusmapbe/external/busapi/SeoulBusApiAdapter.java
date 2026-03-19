@@ -1,5 +1,6 @@
 package com.stw.climatebusmapbe.external.busapi;
 
+import com.stw.climatebusmapbe.common.exception.ApiRateLimitException;
 import com.stw.climatebusmapbe.common.exception.BusApiException;
 import com.stw.climatebusmapbe.external.busapi.dto.BusArrivalDto;
 import com.stw.climatebusmapbe.external.busapi.dto.NearbyStationDto;
@@ -62,6 +63,10 @@ public class SeoulBusApiAdapter implements BusApiPort {
             String headerCd = getTagValue("headerCd", doc);
             if (!"0".equals(headerCd)) {
                 String msg = getTagValue("headerMsg", doc);
+                if ("22".equals(headerCd)) {
+                    log.warn("서울 버스 API 일일 호출 한도 초과 (headerCd=22)");
+                    throw new ApiRateLimitException();
+                }
                 log.info("도착정보 API 비정상 응답 (headerCd={}): {}", headerCd, msg);
                 return List.of(); // 결과 없음 등 비정상 응답 → 빈 목록 반환
             }

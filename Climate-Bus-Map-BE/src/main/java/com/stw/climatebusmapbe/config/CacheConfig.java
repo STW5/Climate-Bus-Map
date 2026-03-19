@@ -19,10 +19,10 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         SimpleCacheManager manager = new SimpleCacheManager();
         manager.setCaches(List.of(
-                buildCache("nearbyStations", 5, TimeUnit.MINUTES),
+                buildCache("nearbyStations", 10, TimeUnit.MINUTES),
                 buildCache("arrivals", 30, TimeUnit.SECONDS),
                 buildCache("climateRouteIds", 60, TimeUnit.MINUTES),
-                buildCache("nearbyClimateRoutes", 5, TimeUnit.MINUTES)
+                buildCache("nearbyClimateRoutes", 120, TimeUnit.MINUTES)
         ));
         return manager;
     }

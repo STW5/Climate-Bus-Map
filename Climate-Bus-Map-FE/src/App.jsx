@@ -48,6 +48,7 @@ export default function App() {
   const [climateStationIds, setClimateStationIds] = useState(new Set());
   const [climateLoading, setClimateLoading] = useState(false);
   const [climateError, setClimateError] = useState(null);
+  const [climateApiLimitExceeded, setClimateApiLimitExceeded] = useState(false);
 
   const [routeLoading, setRouteLoading] = useState(false);
   const [routePaths, setRoutePaths] = useState([]);
@@ -83,6 +84,7 @@ export default function App() {
       .then((data) => {
         setClimateRoutes(data.routes || []);
         setClimateStationIds(new Set(data.climateStationIds || []));
+        setClimateApiLimitExceeded(data.apiLimitExceeded || false);
       })
       .catch((e) => setClimateError(e.message))
       .finally(() => setClimateLoading(false));
@@ -100,7 +102,11 @@ export default function App() {
       const fetchedAt = Date.now();
       setArrivals(data.map(a => ({ ...a, fetchedAt })));
     } catch (e) {
-      setArrivalError(e.message);
+      setArrivalError(
+        e.message === 'API_LIMIT_EXCEEDED'
+          ? '오늘 버스 정보 조회 한도에 도달했습니다. 내일 자정에 초기화됩니다.'
+          : e.message
+      );
     } finally {
       setArrivalLoading(false);
     }
@@ -288,6 +294,7 @@ export default function App() {
         routes={climateRoutes}
         loading={climateLoading}
         error={climateError}
+        apiLimitExceeded={climateApiLimitExceeded}
       />
     );
   }, [

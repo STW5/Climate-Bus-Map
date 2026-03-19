@@ -10,9 +10,13 @@ export async function fetchNearbyStations(lat, lng, radius = 500) {
 
 export async function fetchArrivals(stationId) {
   const res = await fetch(`${BASE_URL}/api/v1/stations/${stationId}/arrivals`);
+  if (res.status === 429) throw new Error('API_LIMIT_EXCEEDED');
   if (!res.ok) throw new Error(`서버 오류 (HTTP ${res.status})`);
   const json = await res.json();
-  if (!json.success) throw new Error(json.error);
+  if (!json.success) {
+    if (json.error === 'API_LIMIT_EXCEEDED') throw new Error('API_LIMIT_EXCEEDED');
+    throw new Error(json.error);
+  }
   return json.data.arrivals;
 }
 

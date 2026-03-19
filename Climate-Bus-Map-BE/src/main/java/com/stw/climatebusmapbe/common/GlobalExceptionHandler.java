@@ -1,5 +1,6 @@
 package com.stw.climatebusmapbe.common;
 
+import com.stw.climatebusmapbe.common.exception.ApiRateLimitException;
 import com.stw.climatebusmapbe.common.exception.BusApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<Void> handleIllegalArgument(IllegalArgumentException e) {
         return ApiResponse.fail(e.getMessage());
+    }
+
+    @ExceptionHandler(ApiRateLimitException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ApiResponse<Void> handleApiRateLimit(ApiRateLimitException e) {
+        log.warn("서울 버스 API 일일 호출 한도 초과");
+        return ApiResponse.fail("API_LIMIT_EXCEEDED");
     }
 
     @ExceptionHandler(BusApiException.class)

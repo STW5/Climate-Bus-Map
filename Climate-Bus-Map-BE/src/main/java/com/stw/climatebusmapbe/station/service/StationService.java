@@ -1,5 +1,7 @@
 package com.stw.climatebusmapbe.station.service;
 
+import com.stw.climatebusmapbe.common.ApiRateLimitState;
+import com.stw.climatebusmapbe.common.exception.ApiRateLimitException;
 import com.stw.climatebusmapbe.external.busapi.BusApiPort;
 import com.stw.climatebusmapbe.external.busapi.dto.BusArrivalDto;
 import com.stw.climatebusmapbe.external.busapi.dto.NearbyStationDto;
@@ -19,6 +21,7 @@ import java.util.*;
 public class StationService {
 
     private final BusApiPort busApiPort;
+    private final ApiRateLimitState rateLimitState;
 
     @Cacheable(value = "nearbyStations", key = "#lat + '_' + #lng + '_' + #radius")
     public NearbyStationsResponse getNearbyStations(double lat, double lng, int radius) {
@@ -43,6 +46,12 @@ public class StationService {
         List<ClimateRoutesResponse.RouteDto> climateRoutes = new ArrayList<>();
         Set<String> climateStationIds = new LinkedHashSet<>();
 
+        // 한도 초과 상태면 API 호출 없이 빈 응답 + 플래그 반환
+        if (rateLimitState.isLimited()) {
+            log.info("일일 API 호출 한도 초과 상태 — 도착정보 조회 생략");
+            return new ClimateRoutesResponse(climateRoutes, stations.size(), new ArrayList<>(climateStationIds), true);
+        }
+
         // API 호출 최소화: 최대 8개 정류소만 체크 (일일 호출 한도 보호)
         int checkLimit = Math.min(stations.size(), 8);
         for (int i = 0; i < checkLimit; i++) {
@@ -60,6 +69,10 @@ public class StationService {
                         }
                     }
                 }
+            } catch (ApiRateLimitException e) {
+                rateLimitState.markLimited();
+                log.warn("일일 API 호출 한도 초과 감지 — 오늘 추가 조회 중단");
+                return new ClimateRoutesResponse(climateRoutes, stations.size(), new ArrayList<>(climateStationIds), true);
             } catch (Exception e) {
                 log.warn("정류소 {} 도착정보 조회 실패: {}", stationId, e.getMessage());
             }
