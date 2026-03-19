@@ -33,6 +33,12 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   const routeMarkersRef = useRef([]);
   const myLocationMarkerRef = useRef(null);
 
+  // 항상 최신값 참조 (클로저 문제 방지)
+  const stationsRef = useRef(stations);
+  const onStationSelectRef = useRef(onStationSelect);
+  useEffect(() => { stationsRef.current = stations; }, [stations]);
+  useEffect(() => { onStationSelectRef.current = onStationSelect; }, [onStationSelect]);
+
   // 지도 초기화 — center dep 변경 시 cleanup 없이 1회만 실행
   // cleanup을 반환하지 않으므로 center 변경 시 지도 재생성 없음
   useEffect(() => {
@@ -51,6 +57,20 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       map,
       icon: makeMyLocationIcon(),
       zIndex: 1000,
+    });
+
+    // 지도 클릭/탭 → 가장 가까운 정류장 선택 (모바일 마커 click 이벤트 미지원 대응)
+    map.addListener('click', (e) => {
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      const THRESHOLD = 0.0004; // ~40m (위도 기준)
+      let closest = null;
+      let minDist = THRESHOLD;
+      stationsRef.current.forEach((station) => {
+        const d = Math.hypot(lat - station.lat, lng - station.lng);
+        if (d < minDist) { minDist = d; closest = station; }
+      });
+      if (closest) onStationSelectRef.current(closest);
     });
 
     let showTimer = null;
@@ -102,17 +122,14 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       }
     });
 
-    // 추가: 새로 생긴 정류소만 마커 생성
+    // 추가: 새로 생긴 정류소만 마커 생성 (click 이벤트는 map-level에서 처리)
     stations.forEach((station) => {
       if (markersRef.current.has(station.stationId)) return;
       const marker = new window.Tmapv2.Marker({
         position: new window.Tmapv2.LatLng(station.lat, station.lng),
         map: mapRef.current,
         title: station.stationName,
-        clickable: true,
       });
-      const handleClick = () => onStationSelect(station);
-      marker.addListener('click', handleClick);
       markersRef.current.set(station.stationId, marker);
     });
   }, [tmapReady, stations, onStationSelect]);
