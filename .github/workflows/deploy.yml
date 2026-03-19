@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy frontend to server
+      - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -19,6 +19,6 @@ jobs:
             cd ~/climatego
             git fetch origin
             git reset --hard origin/main
-            docker compose build --no-cache frontend
-            docker compose up -d frontend
+            docker compose build --no-cache frontend backend
+            docker compose up -d frontend backend
             docker image prune -f
