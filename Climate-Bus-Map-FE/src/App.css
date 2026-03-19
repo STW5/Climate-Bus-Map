@@ -823,54 +823,63 @@ body {
 
 /* ─── 반응형: 태블릿 / 데스크탑 ─────────────── */
 @media (min-width: 768px) {
-  /* GPS 버튼: 우측 하단 고정 */
-  .gps-btn {
-    bottom: 24px;
-    right: 20px;
-  }
-
   /* 탭바 숨김 */
   .bottom-tab-bar { display: none; }
 
-  /* 검색바 → 데스크탑에서 static header처럼 */
+  /* 검색바 → 좌측 패널 상단에 고정 */
   .floating-search-bar {
-    top: calc(var(--safe-top) + 16px);
+    top: 16px;
     left: 16px;
-    right: 16px;
+    right: auto;
+    width: 360px;
+    z-index: 200;
   }
 
-  /* 바텀 시트 → 우측 사이드 패널 */
+  /* 바텀 시트 → 좌측 사이드 패널 (검색바 아래) */
   .draggable-sheet {
-    top: 16px;
+    top: 76px;          /* 검색바 높이(~48px) + 상하 여백 */
     bottom: 16px;
-    right: 16px;
-    left: auto;
+    left: 16px;
+    right: auto;
     width: 360px;
     border-radius: 16px !important;
     box-shadow: var(--shadow-lg) !important;
-    height: calc(100% - 32px) !important; /* JS 높이 제어 무시 */
+    height: auto !important; /* JS 높이 제어 무시, top+bottom으로 결정 */
     padding-bottom: 0;
     transition: none;
-    transform: none;
     overflow: hidden;
+    /* peek pointer-events 해제: 데스크탑에서는 항상 활성 */
+    pointer-events: auto !important;
   }
 
   .draggable-sheet .drag-handle { display: none; }
 
-  /* FAB 그룹: 데스크탑 우측 하단 */
+  /* FAB 그룹: 지도 우측 */
   .map-fab-group {
     bottom: 80px;
     right: 20px;
   }
 
-  /* 시트 내 패널 오버라이드 해제 (데스크탑에서는 시트 안에서도 자연스럽게) */
+  /* GPS 버튼: 지도 우측 하단 */
+  .gps-btn {
+    bottom: 24px;
+    right: 20px;
+  }
+
+  /* 에러 토스트: 패널 오른쪽 공간 */
+  .stations-error {
+    left: 396px;
+    transform: none;
+    top: 16px;
+  }
+
+  /* 시트 내 패널: 데스크탑에서 전체 높이 채우기 */
   .sheet-inner .arrival-panel,
   .sheet-inner .route-result-panel,
   .sheet-inner .sel-route-panel {
     height: 100% !important;
   }
 
-  /* 도착 패널 CSS는 이제 시트 안에서만 쓰이므로 데스크탑에서도 override */
   .drag-handle {
     display: none;
   }
