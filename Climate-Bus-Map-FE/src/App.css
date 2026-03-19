@@ -108,7 +108,7 @@ body {
 .map-fab-group {
   position: absolute;
   right: 14px;
-  bottom: calc(56px + var(--safe-bottom) + 80px); /* 탭바 + 여유 */
+  bottom: calc(var(--safe-bottom) + 15vh + 52px); /* peek(14vh) 위 */
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -117,7 +117,7 @@ body {
 }
 
 .map-fab-group--route {
-  bottom: calc(80px); /* 탭바 숨김 시 */
+  bottom: calc(15vh + 52px); /* 탭바 숨김 시 */
 }
 
 /* ─── Draggable Bottom Sheet ─────────────── */
@@ -504,7 +504,7 @@ body {
 .gps-btn {
   position: absolute;
   right: 14px;
-  bottom: calc(56px + var(--safe-bottom) + 24px); /* 탭바 위 */
+  bottom: calc(var(--safe-bottom) + 15vh); /* peek(14vh) 위 */
   z-index: 50;
   width: 44px;
   height: 44px;
@@ -628,8 +628,9 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 8px 18px 14px;
+  padding: 8px 14px 14px 18px;
   flex-shrink: 0;
+  gap: 8px;
 }
 
 .station-info {
