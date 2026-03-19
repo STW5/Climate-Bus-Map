@@ -43,7 +43,9 @@ public class StationService {
         List<ClimateRoutesResponse.RouteDto> climateRoutes = new ArrayList<>();
         Set<String> climateStationIds = new LinkedHashSet<>();
 
-        for (int i = 0; i < stations.size(); i++) {
+        // API 호출 최소화: 최대 8개 정류소만 체크 (일일 호출 한도 보호)
+        int checkLimit = Math.min(stations.size(), 8);
+        for (int i = 0; i < checkLimit; i++) {
             String stationId = stations.get(i).getStationId();
             try {
                 List<BusArrivalDto> arrivals = busApiPort.getArrivals(stationId);

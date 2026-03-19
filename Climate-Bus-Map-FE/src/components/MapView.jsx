@@ -173,7 +173,7 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       }
     });
 
-    // 추가: 새로 생긴 정류소만 마커 생성 (click 이벤트는 map-level에서 처리)
+    // 추가: 새로 생긴 정류소만 마커 생성
     stations.forEach((station) => {
       if (markersRef.current.has(station.stationId)) return;
       const marker = new window.Tmapv2.Marker({
@@ -181,6 +181,8 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         map: mapRef.current,
         title: station.stationName,
       });
+      // 데스크탑 마우스 클릭 (마커 클릭 시 map click 이벤트 미전파 대응)
+      marker.addListener('click', () => onStationSelectRef.current(station));
       markersRef.current.set(station.stationId, marker);
     });
   }, [tmapReady, stations, onStationSelect]);
