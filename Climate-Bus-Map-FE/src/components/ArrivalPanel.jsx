@@ -99,7 +99,7 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
         <div className="station-info">
           <h2>{station?.stationName ?? ''}</h2>
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
           {station && (
             <button className="favorite-btn" onClick={handleFavoriteToggle} aria-label="즐겨찾기">
               <svg width="18" height="18" viewBox="0 0 24 24" fill={favorited ? '#f59e0b' : 'none'} stroke={favorited ? '#f59e0b' : 'var(--text-muted)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
