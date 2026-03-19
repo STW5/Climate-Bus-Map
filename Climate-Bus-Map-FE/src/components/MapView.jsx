@@ -14,6 +14,16 @@ function GpsIcon() {
   );
 }
 
+const makeBusStopIcon = () => {
+  const svg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26">',
+    '<circle cx="13" cy="13" r="12" fill="#1a73e8" stroke="white" stroke-width="2.5"/>',
+    '<text x="13" y="17" text-anchor="middle" fill="white" font-size="9" font-family="-apple-system,Arial,sans-serif" font-weight="700">정류장</text>',
+    '</svg>',
+  ].join('');
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
+};
+
 const makeMyLocationIcon = () => {
   const svg = [
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">',
@@ -63,7 +73,7 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     map.addListener('click', (e) => {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      const THRESHOLD = 0.0004; // ~40m (위도 기준)
+      const THRESHOLD = 0.001; // ~110m
       let closest = null;
       let minDist = THRESHOLD;
       stationsRef.current.forEach((station) => {
@@ -180,6 +190,9 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         position: new window.Tmapv2.LatLng(station.lat, station.lng),
         map: mapRef.current,
         title: station.stationName,
+        icon: makeBusStopIcon(),
+        iconSize: new window.Tmapv2.Size(26, 26),
+        iconAnchor: new window.Tmapv2.Point(13, 13),
       });
       // 데스크탑 마우스 클릭 (마커 클릭 시 map click 이벤트 미전파 대응)
       marker.addListener('click', () => onStationSelectRef.current(station));
