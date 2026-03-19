@@ -142,16 +142,21 @@ export default function FloatingSearchBar({
         </button>
       )}
 
-      {/* 경로 안내 중 */}
+      {/* 경로 안내 중 — 탭하면 새 검색 */}
       {isLocked && (
-        <div className="floating-search-collapsed floating-search-collapsed--active">
+        <button
+          className="floating-search-collapsed floating-search-collapsed--active"
+          onClick={handleClear}
+          aria-label="새 경로 검색"
+        >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--green-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: 14 }}>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: 14, flex: 1, textAlign: 'left' }}>
             {destQuery || '경로 안내 중'}
           </span>
-        </div>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>새 검색</span>
+        </button>
       )}
 
       {/* 확장 상태 */}
