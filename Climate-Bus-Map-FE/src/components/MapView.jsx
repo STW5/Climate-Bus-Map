@@ -38,11 +38,14 @@ const makeMyLocationIcon = () => {
 export default function MapView({ center, stations, onStationSelect, routePath }) {
   const tmapReady = useTmapReady();
   const mapRef = useRef(null);
-  const markersRef = useRef(new Map()); // stationId → marker
+  const wrapperRef = useRef(null);          // map-container-wrapper div ref
+  const markersRef = useRef(new Map());     // stationId → marker
   const polylinesRef = useRef([]);
   const routeMarkersRef = useRef([]);
   const myLocationMarkerRef = useRef(null);
-  const lastSelectRef = useRef(0); // 중복 호출 방지
+  const lastSelectRef = useRef(0);          // 중복 호출 방지
+  // TMap API 없이 지도 뷰포트 추적 (center/zoom 직접 관리)
+  const mapViewportRef = useRef({ lat: 37.5665, lng: 126.9780, zoom: 15 });
 
   // 항상 최신값 참조 (클로저 문제 방지)
   const stationsRef = useRef(stations);
@@ -50,10 +53,12 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   useEffect(() => { stationsRef.current = stations; }, [stations]);
   useEffect(() => { onStationSelectRef.current = onStationSelect; }, [onStationSelect]);
 
-  // 지도 초기화 — center dep 변경 시 cleanup 없이 1회만 실행
-  // cleanup을 반환하지 않으므로 center 변경 시 지도 재생성 없음
+  // 지도 초기화 — 1회만 실행
   useEffect(() => {
     if (!tmapReady || !center || mapRef.current) return;
+
+    // 초기 뷰포트 설정 (GPS 위치 + zoom 15)
+    mapViewportRef.current = { lat: center.lat, lng: center.lng, zoom: 15 };
 
     const map = new window.Tmapv2.Map('map-container', {
       center: new window.Tmapv2.LatLng(center.lat, center.lng),
@@ -70,16 +75,15 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       zIndex: 1000,
     });
 
-    // 지도 클릭/탭 → 가장 가까운 정류장 선택
+    // 지도 클릭 (데스크탑)
     const handleMapTap = (e) => {
       if (!e.latLng) return;
       const now = Date.now();
       if (now - lastSelectRef.current < 500) return;
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      const THRESHOLD = 0.001; // ~110m
-      let closest = null;
-      let minDist = THRESHOLD;
+      const THRESHOLD = 0.001;
+      let closest = null, minDist = THRESHOLD;
       stationsRef.current.forEach((station) => {
         const d = Math.hypot(lat - station.lat, lng - station.lng);
         if (d < minDist) { minDist = d; closest = station; }
@@ -87,28 +91,42 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       if (closest) { lastSelectRef.current = Date.now(); onStationSelectRef.current(closest); }
     };
     map.addListener('click', handleMapTap);
-    // TMap 모바일 전용 이벤트 시도 (지원 여부 불확실)
     try { map.addListener('tap', handleMapTap); } catch { /* 미지원 */ }
+
+    // 지도 pan/zoom 추적 — TMap API 호출이 탭 시점에 필요 없도록
+    const updateCenter = () => {
+      try {
+        const c = map.getCenter();
+        if (c && typeof c.lat === 'function') {
+          mapViewportRef.current = { ...mapViewportRef.current, lat: c.lat(), lng: c.lng() };
+        }
+      } catch { /* getCenter 미지원 시 마지막 known값 유지 */ }
+    };
+    try { map.addListener('center_changed', updateCenter); } catch { /* 미지원 */ }
+    try { map.addListener('dragend', updateCenter); } catch { /* 미지원 */ }
 
     let showTimer = null;
     map.addListener('zoom_changed', () => {
+      try {
+        const z = map.getZoom();
+        if (typeof z === 'number') mapViewportRef.current = { ...mapViewportRef.current, zoom: z };
+      } catch { /* zoom 추적 실패 시 마지막 known값 유지 */ }
       markersRef.current.forEach(m => m.setVisible(false));
       clearTimeout(showTimer);
       showTimer = setTimeout(() => {
         markersRef.current.forEach(m => m.setVisible(true));
       }, 300);
     });
-    // cleanup 없음 — center 변경 시 지도 파괴 방지
   }, [tmapReady, center]);
 
-  // 모바일 touchend → 가장 가까운 정류장 선택 (TMap click 이벤트 모바일 미지원 대응)
+  // 모바일 터치 탭 감지 — document 레벨 capture로 TMap 내부 교체에 무관하게 동작
   const touchListenersRef = useRef(null);
   useEffect(() => {
     if (!tmapReady || !mapRef.current) return;
-    const mapEl = document.getElementById('map-container');
-    if (!mapEl || touchListenersRef.current) return;
+    if (touchListenersRef.current) return;
 
     let touchStartX = 0, touchStartY = 0, moved = false;
+
     const onTS = (e) => {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
@@ -122,41 +140,48 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       if (moved) return;
       const now = Date.now();
       if (now - lastSelectRef.current < 500) return;
+
       const touch = e.changedTouches[0];
-      const rect = mapEl.getBoundingClientRect();
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
+
+      // 지도 영역 탭인지 확인 (시트/탭바/버튼 제외)
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target || !wrapper.contains(target)) return;
+
+      // TMap API 호출 없이 직접 추적한 뷰포트로 계산
+      const { lat: cLat, lng: cLng, zoom } = mapViewportRef.current;
+      const rect = wrapper.getBoundingClientRect();
       const px = touch.clientX - rect.left;
       const py = touch.clientY - rect.top;
-      try {
-        // getBounds() 미지원 대비: getCenter+getZoom 기반 계산
-        const mapCenter = mapRef.current.getCenter();
-        const zoom = mapRef.current.getZoom();
-        const metersPerPx = (156543.03392 * Math.cos(mapCenter.lat() * Math.PI / 180)) / Math.pow(2, zoom);
-        const lat = mapCenter.lat() - ((py - rect.height / 2) * metersPerPx) / 111111;
-        const lng = mapCenter.lng() + ((px - rect.width / 2) * metersPerPx) / (111111 * Math.cos(mapCenter.lat() * Math.PI / 180));
-        const THRESHOLD = 0.001;
-        let closest = null, minDist = THRESHOLD;
-        stationsRef.current.forEach((s) => {
-          const d = Math.hypot(lat - s.lat, lng - s.lng);
-          if (d < minDist) { minDist = d; closest = s; }
-        });
-        if (closest) { lastSelectRef.current = Date.now(); onStationSelectRef.current(closest); }
-      } catch { /* ignore */ }
+      const metersPerPx = (156543.03392 * Math.cos(cLat * Math.PI / 180)) / Math.pow(2, zoom);
+      const lat = cLat - ((py - rect.height / 2) * metersPerPx) / 111111;
+      const lng = cLng + ((px - rect.width / 2) * metersPerPx) / (111111 * Math.cos(cLat * Math.PI / 180));
+
+      const THRESHOLD = 0.001;
+      let closest = null, minDist = THRESHOLD;
+      stationsRef.current.forEach((s) => {
+        const d = Math.hypot(lat - s.lat, lng - s.lng);
+        if (d < minDist) { minDist = d; closest = s; }
+      });
+      if (closest) { lastSelectRef.current = Date.now(); onStationSelectRef.current(closest); }
     };
 
-    mapEl.addEventListener('touchstart', onTS, { passive: true, capture: true });
-    mapEl.addEventListener('touchmove', onTM,  { passive: true, capture: true });
-    mapEl.addEventListener('touchend',   onTE,  { passive: true, capture: true });
-    touchListenersRef.current = { mapEl, onTS, onTM, onTE };
-  }, [tmapReady, center]);  // map 초기화 후 1회만 실행 (center 의존 추가: TMap보다 위치가 늦게 오는 경우 대비)
+    document.addEventListener('touchstart', onTS, { passive: true, capture: true });
+    document.addEventListener('touchmove',  onTM, { passive: true, capture: true });
+    document.addEventListener('touchend',   onTE, { passive: true, capture: true });
+    touchListenersRef.current = { onTS, onTM, onTE };
+  }, [tmapReady, center]);
 
-  // 언마운트 시에만 지도 정리
+  // 언마운트 시 정리
   useEffect(() => {
     return () => {
       if (touchListenersRef.current) {
-        const { mapEl, onTS, onTM, onTE } = touchListenersRef.current;
-        mapEl.removeEventListener('touchstart', onTS, { capture: true });
-        mapEl.removeEventListener('touchmove',  onTM, { capture: true });
-        mapEl.removeEventListener('touchend',   onTE, { capture: true });
+        const { onTS, onTM, onTE } = touchListenersRef.current;
+        document.removeEventListener('touchstart', onTS, { capture: true });
+        document.removeEventListener('touchmove',  onTM, { capture: true });
+        document.removeEventListener('touchend',   onTE, { capture: true });
+        touchListenersRef.current = null;
       }
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current.clear();
@@ -185,7 +210,6 @@ export default function MapView({ center, stations, onStationSelect, routePath }
 
     const newIds = new Set(stations.map((s) => s.stationId));
 
-    // 제거: 현재 맵에 없는 마커 삭제
     markersRef.current.forEach((marker, id) => {
       if (!newIds.has(id)) {
         marker.setMap(null);
@@ -193,7 +217,6 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       }
     });
 
-    // 추가: 새로 생긴 정류소만 마커 생성
     stations.forEach((station) => {
       if (markersRef.current.has(station.stationId)) return;
       const marker = new window.Tmapv2.Marker({
@@ -227,19 +250,17 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     if (!routePath) return;
 
     const subPaths = routePath.subPath ?? [];
-    const allCoords = []; // 전체 좌표 (bounds 계산용)
+    const allCoords = [];
 
-    // 구간별 색상
     const segmentColor = (sp) => {
-      if (sp.trafficType === 3) return '#4b5563';          // 도보: 진회색
-      if (sp.climateEligible === false) return '#d32f2f';   // 기후동행 불가: 빨강
-      if (sp.trafficType === 1) return '#1a56c4';           // 지하철: 파랑
-      return '#0ea5e9';                                     // 버스: 하늘
+      if (sp.trafficType === 3) return '#4b5563';
+      if (sp.climateEligible === false) return '#d32f2f';
+      if (sp.trafficType === 1) return '#1a56c4';
+      return '#0ea5e9';
     };
 
     const drawPolyline = (coords, color, isDashed) => {
       if (coords.length < 2) return null;
-      // 흰색 테두리 (가독성)
       const outline = new window.Tmapv2.Polyline({
         path: coords,
         strokeColor: '#ffffff',
@@ -275,7 +296,6 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         }).filter(Boolean);
       }
 
-      // 도보 구간: stations 없으면 startX/Y → endX/Y 직선
       if (coords.length === 0 && subPath.trafficType === 3) {
         const sLat = parseFloat(subPath.startY), sLng = parseFloat(subPath.startX);
         const eLat = parseFloat(subPath.endY), eLng = parseFloat(subPath.endX);
@@ -289,7 +309,6 @@ export default function MapView({ center, stations, onStationSelect, routePath }
 
       if (coords.length === 0) return;
 
-      // 이전 구간 끝 → 현재 구간 시작 연결 (끊김 방지)
       if (prevLastCoord) {
         drawPolyline([prevLastCoord, coords[0]], '#cccccc', true);
       }
@@ -302,7 +321,6 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       prevLastCoord = coords[coords.length - 1];
     });
 
-    // 전체 경로 보이도록 지도 범위 조정 + 출발/도착 마커
     if (allCoords.length > 0) {
       const lats = allCoords.map((c) => c.lat());
       const lngs = allCoords.map((c) => c.lng());
@@ -358,7 +376,7 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   }
 
   return (
-    <div className="map-container-wrapper">
+    <div className="map-container-wrapper" ref={wrapperRef}>
       <div id="map-container" style={{ width: '100%', height: '100%' }} />
       <button className="gps-btn" onClick={handleRecenter} aria-label="내 위치로">
         <GpsIcon />
