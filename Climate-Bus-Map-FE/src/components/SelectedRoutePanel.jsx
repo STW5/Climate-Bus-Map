@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isPathFullyClimate } from '../utils/climateChecker';
+import { useAuth } from '../context/AuthContext';
+import { saveRoute } from '../api/savedRoutesApi';
 
 const SUBWAY_NAMES = {
   1:'1호선',2:'2호선',3:'3호선',4:'4호선',5:'5호선',
@@ -148,11 +150,29 @@ function SegmentDetail({ subPath, startMin, boardingTime }) {
 }
 
 export default function SelectedRoutePanel({ path, boardingTime, segmentBoardingTimes = [], onBack, onClose }) {
+  const { isLoggedIn } = useAuth();
+  const [saveState, setSaveState] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
+
   if (!path) return null;
 
   const subPaths = path.subPath ?? [];
   const fullyClimate = isPathFullyClimate(subPaths);
   const totalTime = path.info?.totalTime ?? 0;
+
+  const startName = path._start?.name ?? '출발지';
+  const endName = path._end?.name ?? '도착지';
+
+  const handleSave = async () => {
+    if (!isLoggedIn || saveState === 'saving' || saveState === 'saved') return;
+    setSaveState('saving');
+    try {
+      await saveRoute(`${startName}→${endName}`, startName, endName, path);
+      setSaveState('saved');
+    } catch (e) {
+      alert(e.message);
+      setSaveState('error');
+    }
+  };
 
   return (
     <div className="sel-route-panel">
@@ -168,6 +188,16 @@ export default function SelectedRoutePanel({ path, boardingTime, segmentBoarding
           <span className="sel-route-time">{totalTime}분</span>
           <span className="sel-route-arrival">{arrivalTimeStr(totalTime)} 도착</span>
         </div>
+        {isLoggedIn && (
+          <button
+            className={`save-route-btn${saveState === 'saved' ? ' save-route-btn--saved' : ''}`}
+            onClick={handleSave}
+            disabled={saveState === 'saving' || saveState === 'saved'}
+            aria-label="경로 저장"
+          >
+            {saveState === 'saved' ? '저장됨' : '저장'}
+          </button>
+        )}
         <button className="close-btn" onClick={onClose} aria-label="닫기">✕</button>
       </div>
 

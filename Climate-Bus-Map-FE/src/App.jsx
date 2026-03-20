@@ -10,6 +10,7 @@ import DraggableBottomSheet from './components/DraggableBottomSheet';
 import BottomTabBar from './components/BottomTabBar';
 import FloatingSearchBar from './components/FloatingSearchBar';
 import LoginModal from './components/LoginModal';
+import SavedRoutesPanel from './components/SavedRoutesPanel';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useGeolocation } from './hooks/useGeolocation';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
@@ -319,6 +320,22 @@ function AppInner() {
           onLoginRequest={() => setLoginOpen(true)}
         />
       );
+    }
+    if (activeTab === 'saved') {
+      if (!isLoggedIn) {
+        return (
+          <div className="climate-routes-panel">
+            <p className="favorites-empty">
+              로그인하면 경로를 저장할 수 있습니다.
+              <br />
+              <button className="favorites-login-hint" style={{ display: 'inline', marginTop: 8 }} onClick={() => setLoginOpen(true)}>
+                로그인하기
+              </button>
+            </p>
+          </div>
+        );
+      }
+      return <SavedRoutesPanel onRouteRestore={(detail) => { handleSelectPath(detail.routeJson, 0); }} />;
     }
     return (
       <ClimateRoutesPanel
