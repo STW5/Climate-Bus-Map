@@ -52,6 +52,12 @@ function AppInner() {
   const isLoggedInRef = useRef(isLoggedIn);
   useEffect(() => { isLoggedInRef.current = isLoggedIn; }, [isLoggedIn]);
 
+  // position, boardingTimes를 ref로 관리 → handleRouteSearch, handleSelectPath를 stable하게 유지
+  const positionRef = useRef(position);
+  useEffect(() => { positionRef.current = position; }, [position]);
+  const boardingTimesRef = useRef([]);
+  useEffect(() => { boardingTimesRef.current = boardingTimes; }, [boardingTimes]);
+
   const refreshFavorites = useCallback(() => {
     getFavoritesForUser(isLoggedInRef.current).then(setFavorites).catch(() => setFavorites(getFavorites()));
   }, []); // deps 없음 → stable reference, 무한렌더 방지
@@ -167,7 +173,7 @@ function AppInner() {
 
   // ── 경로 탐색 ──────────────────────────────────
   const handleRouteSearch = useCallback(async (start, destination) => {
-    if (!position) return;
+    if (!positionRef.current) return;
     setSelectedStation(null);
     setArrivals([]);
     setArrivalError(null);
@@ -177,8 +183,8 @@ function AppInner() {
     setBoardingTimes([]);
     setSheetSnap(1);
     try {
-      const paths = await searchTransitRoute(start || position, destination);
-      const actualStart = start || position;
+      const paths = await searchTransitRoute(start || positionRef.current, destination);
+      const actualStart = start || positionRef.current;
       const tagged = paths.map((path) => ({
         ...path,
         _start: actualStart,
@@ -192,10 +198,10 @@ function AppInner() {
     } finally {
       setRouteLoading(false);
     }
-  }, [position]);
+  }, []); // positionRef로 최신값 참조 → stable reference
 
   const handleSelectPath = useCallback(async (path, pathIndex) => {
-    setSelectedBoardingTime(boardingTimes[pathIndex] ?? null);
+    setSelectedBoardingTime(boardingTimesRef.current[pathIndex] ?? null);
     const withLane = await loadLaneForPath(path.info?.mapObj, path.subPath ?? []);
 
     const segCoord = (sp, last = false) => {
@@ -228,7 +234,7 @@ function AppInner() {
     selectedPathRef.current = finalPath;
     setSheetSnap(0); // 지도 보기 우선 (peek)
     fetchSegmentBoardingTimes(finalPath.subPath).then(setSegmentBoardingTimes);
-  }, [boardingTimes]);
+  }, []); // boardingTimesRef로 최신값 참조 → stable reference
 
   // 30초마다 구간별 도착 시간 재조회
   useEffect(() => {
@@ -262,8 +268,13 @@ function AppInner() {
   }, [climateLoading, hasClimateContent, activeTab, selectedStation, selectedPath, routePaths]);
 
   // ── 탭 네비게이션 ──────────────────────────────
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+  const hasClimateContentRef = useRef(hasClimateContent);
+  useEffect(() => { hasClimateContentRef.current = hasClimateContent; }, [hasClimateContent]);
+
   const handleTabChange = useCallback((tab) => {
-    if (tab === activeTab) {
+    if (tab === activeTabRef.current) {
       // 같은 탭 재클릭: peek ↔ half 토글
       setSheetSnap(prev => prev === 0 ? 1 : 0);
     } else {
@@ -271,12 +282,12 @@ function AppInner() {
       if (tab === 'route') {
         setSheetSnap(0); // 경로 탭: 지도 보이게
       } else if (tab === 'nearby') {
-        setSheetSnap(hasClimateContent ? 1 : 0); // 콘텐츠 없으면 peek 유지
+        setSheetSnap(hasClimateContentRef.current ? 1 : 0); // 콘텐츠 없으면 peek 유지
       } else {
         setSheetSnap(1); // favorites 등
       }
     }
-  }, [activeTab, hasClimateContent]);
+  }, []); // activeTabRef, hasClimateContentRef로 최신값 참조 → stable reference
 
   const handleSheetClose = useCallback(() => {
     setSheetSnap(0);
@@ -363,7 +374,7 @@ function AppInner() {
     return null;
   }, [
     selectedPath, routePaths, routeLoading, selectedStation, activeTab, favorites, isLoggedIn,
-    arrivals, arrivalLoading, arrivalError, climateRoutes, climateLoading, climateError,
+    arrivals, arrivalLoading, arrivalError, climateStationIds,
     boardingTimes, selectedBoardingTime, segmentBoardingTimes,
     handleRouteClose, handleStationClose, handleSelectPath, handleStationSelect, refreshFavorites,
   ]);
