@@ -65,6 +65,8 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       width: '100%',
       height: '100%',
       zoom: 15,
+      zoomControl: false,
+      scaleBar: false,
     });
     mapRef.current = map;
 

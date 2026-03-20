@@ -964,20 +964,10 @@ body {
   background: var(--bg-card);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  padding: 11px 13px 13px;
-  min-width: 150px;
-  max-width: 190px;
+  padding: 9px 11px 11px;
+  width: fit-content;
   z-index: 10;
   border: 1px solid var(--border);
-}
-
-@media (max-width: 767px) {
-  .climate-panel {
-    left: auto;
-    right: 16px;
-    bottom: 24px;
-    max-width: 170px;
-  }
 }
 
 .climate-panel__header {
@@ -1900,8 +1890,10 @@ body {
 }
 
 .auth-fab__btn--login {
-  color: var(--green-primary);
-  padding: 0 14px;
+  background: var(--green-primary);
+  color: #fff;
+  padding: 0 16px;
+  font-weight: 700;
 }
 
 .auth-fab__avatar {
@@ -1925,6 +1917,8 @@ body {
 .modal-sheet {
   width: 100%;
   max-width: 480px;
+  max-height: 92dvh;
+  overflow-y: auto;
   background: var(--bg-card);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding: 20px 20px calc(24px + var(--safe-bottom));
