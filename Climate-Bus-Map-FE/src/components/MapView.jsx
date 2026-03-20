@@ -42,6 +42,7 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   const polylinesRef = useRef([]);
   const routeMarkersRef = useRef([]);
   const myLocationMarkerRef = useRef(null);
+  const lastSelectRef = useRef(0); // 중복 호출 방지
 
   // 항상 최신값 참조 (클로저 문제 방지)
   const stationsRef = useRef(stations);
@@ -69,8 +70,11 @@ export default function MapView({ center, stations, onStationSelect, routePath }
       zIndex: 1000,
     });
 
-    // 지도 클릭/탭 → 가장 가까운 정류장 선택 (모바일 마커 click 이벤트 미지원 대응)
-    map.addListener('click', (e) => {
+    // 지도 클릭/탭 → 가장 가까운 정류장 선택
+    const handleMapTap = (e) => {
+      if (!e.latLng) return;
+      const now = Date.now();
+      if (now - lastSelectRef.current < 500) return;
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
       const THRESHOLD = 0.001; // ~110m
@@ -80,8 +84,11 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         const d = Math.hypot(lat - station.lat, lng - station.lng);
         if (d < minDist) { minDist = d; closest = station; }
       });
-      if (closest) onStationSelectRef.current(closest);
-    });
+      if (closest) { lastSelectRef.current = Date.now(); onStationSelectRef.current(closest); }
+    };
+    map.addListener('click', handleMapTap);
+    // TMap 모바일 전용 이벤트 시도 (지원 여부 불확실)
+    try { map.addListener('tap', handleMapTap); } catch { /* 미지원 */ }
 
     let showTimer = null;
     map.addListener('zoom_changed', () => {
@@ -113,23 +120,26 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     };
     const onTE = (e) => {
       if (moved) return;
+      const now = Date.now();
+      if (now - lastSelectRef.current < 500) return;
       const touch = e.changedTouches[0];
       const rect = mapEl.getBoundingClientRect();
       const px = touch.clientX - rect.left;
       const py = touch.clientY - rect.top;
       try {
-        const bounds = mapRef.current.getBounds();
-        const ne = bounds.getNE();
-        const sw = bounds.getSW();
-        const lat = ne.lat() - (py / rect.height) * (ne.lat() - sw.lat());
-        const lng = sw.lng() + (px / rect.width) * (ne.lng() - sw.lng());
-        const THRESHOLD = 0.0004;
+        // getBounds() 미지원 대비: getCenter+getZoom 기반 계산
+        const mapCenter = mapRef.current.getCenter();
+        const zoom = mapRef.current.getZoom();
+        const metersPerPx = (156543.03392 * Math.cos(mapCenter.lat() * Math.PI / 180)) / Math.pow(2, zoom);
+        const lat = mapCenter.lat() - ((py - rect.height / 2) * metersPerPx) / 111111;
+        const lng = mapCenter.lng() + ((px - rect.width / 2) * metersPerPx) / (111111 * Math.cos(mapCenter.lat() * Math.PI / 180));
+        const THRESHOLD = 0.001;
         let closest = null, minDist = THRESHOLD;
         stationsRef.current.forEach((s) => {
           const d = Math.hypot(lat - s.lat, lng - s.lng);
           if (d < minDist) { minDist = d; closest = s; }
         });
-        if (closest) onStationSelectRef.current(closest);
+        if (closest) { lastSelectRef.current = Date.now(); onStationSelectRef.current(closest); }
       } catch { /* ignore */ }
     };
 
@@ -193,8 +203,14 @@ export default function MapView({ center, stations, onStationSelect, routePath }
         icon: makeBusStopIcon(),
         iconSize: new window.Tmapv2.Size(26, 26),
       });
-      // 데스크탑 마우스 클릭 (마커 클릭 시 map click 이벤트 미전파 대응)
-      marker.addListener('click', () => onStationSelectRef.current(station));
+      const selectThis = () => {
+        const now = Date.now();
+        if (now - lastSelectRef.current < 500) return;
+        lastSelectRef.current = Date.now();
+        onStationSelectRef.current(station);
+      };
+      marker.addListener('click', selectThis);
+      marker.addListener('touchend', selectThis);
       markersRef.current.set(station.stationId, marker);
     });
   }, [tmapReady, stations, onStationSelect]);

@@ -186,7 +186,7 @@ body {
   border: none !important;
   border-radius: 0 !important;
   max-width: none !important;
-  padding: 16px;
+  padding: 10px 14px 12px;
 }
 
 .sheet-inner .climate-routes-panel {
@@ -612,14 +612,15 @@ body {
 .drag-handle {
   display: flex;
   justify-content: center;
-  padding: 10px 0 2px;
+  padding: 16px 0 14px;
   flex-shrink: 0;
+  cursor: grab;
 }
 
 .drag-handle-bar {
-  width: 36px;
+  width: 40px;
   height: 4px;
-  background: #e2e2e2;
+  background: #d0d0d0;
   border-radius: 2px;
 }
 
@@ -983,7 +984,7 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-bottom: 9px;
+  margin-bottom: 6px;
 }
 
 .climate-panel__title {
