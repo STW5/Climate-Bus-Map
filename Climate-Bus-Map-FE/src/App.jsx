@@ -11,6 +11,7 @@ import BottomTabBar from './components/BottomTabBar';
 import FloatingSearchBar from './components/FloatingSearchBar';
 import LoginModal from './components/LoginModal';
 import SavedRoutesPanel from './components/SavedRoutesPanel';
+import StatsPanel from './components/StatsPanel';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useGeolocation } from './hooks/useGeolocation';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
@@ -321,6 +322,7 @@ function AppInner() {
           error={arrivalError}
           onClose={handleStationClose}
           onFavoriteChange={refreshFavorites}
+          isClimateStation={selectedStation ? climateStationIds.has(selectedStation.stationId) : false}
         />
       );
     }
@@ -330,6 +332,14 @@ function AppInner() {
           favorites={favorites}
           onStationSelect={handleStationSelect}
           onFavoriteChange={refreshFavorites}
+          onLoginRequest={() => setLoginOpen(true)}
+        />
+      );
+    }
+    if (activeTab === 'stats') {
+      return (
+        <StatsPanel
+          isLoggedIn={isLoggedIn}
           onLoginRequest={() => setLoginOpen(true)}
         />
       );

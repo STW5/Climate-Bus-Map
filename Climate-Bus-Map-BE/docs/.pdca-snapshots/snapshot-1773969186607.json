@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-03-17T06:51:56.036Z",
+  "timestamp": "2026-03-20T01:13:06.602Z",
   "reason": "compaction",
   "status": {
     "version": "2.0",
-    "lastUpdated": "2026-03-17T06:50:07.127Z",
+    "lastUpdated": "2026-03-20T01:08:52.686Z",
     "activeFeatures": [
       "climate-bus-map",
       "climatebusmapbe",
@@ -52,7 +52,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-04T07:35:38.830Z",
-          "lastUpdated": "2026-03-06T10:21:29.564Z"
+          "lastUpdated": "2026-03-19T04:34:22.903Z"
         },
         "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/common/GlobalExceptionHandler.java"
       },
@@ -65,7 +65,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-04T07:35:50.232Z",
-          "lastUpdated": "2026-03-17T00:49:46.488Z"
+          "lastUpdated": "2026-03-19T04:33:29.225Z"
         },
         "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/config/CacheConfig.java"
       },
@@ -104,7 +104,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-04T07:36:03.267Z",
-          "lastUpdated": "2026-03-09T05:18:35.475Z"
+          "lastUpdated": "2026-03-19T04:35:52.184Z"
         },
         "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/station/dto/ClimateRoutesResponse.java"
       },
@@ -117,9 +117,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-04T07:36:08.510Z",
-          "lastUpdated": "2026-03-17T02:26:03.762Z"
+          "lastUpdated": "2026-03-19T04:34:06.199Z"
         },
-        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/arrival/service/ArrivalService.java"
+        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/station/service/StationService.java"
       },
       "controller": {
         "phase": "do",
@@ -169,7 +169,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-04T08:11:36.344Z",
-          "lastUpdated": "2026-03-17T01:38:45.076Z"
+          "lastUpdated": "2026-03-20T01:01:39.934Z"
         },
         "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/external/busapi/SeoulBusApiAdapter.java"
       },
@@ -182,9 +182,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-06T08:20:13.836Z",
-          "lastUpdated": "2026-03-06T08:20:13.836Z"
+          "lastUpdated": "2026-03-19T04:33:03.385Z"
         },
-        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/common/exception/BusApiException.java"
+        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-BE/src/main/java/com/stw/climatebusmapbe/common/exception/ApiRateLimitException.java"
       },
       "Climate-Bus-Map-FE": {
         "phase": "do",
@@ -195,9 +195,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-07T12:12:34.377Z",
-          "lastUpdated": "2026-03-17T06:50:07.127Z"
+          "lastUpdated": "2026-03-20T01:08:52.686Z"
         },
-        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-FE/src/components/MapView.jsx"
+        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-FE/src/components/DraggableBottomSheet.jsx"
       },
       "data": {
         "phase": "do",
@@ -221,9 +221,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-03-07T12:12:46.684Z",
-          "lastUpdated": "2026-03-17T06:37:14.472Z"
+          "lastUpdated": "2026-03-19T04:34:31.939Z"
         },
-        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-FE/src/api/tmapApi.js"
+        "lastFile": "/Users/stw/Dev/Climate-Bus-Map/Climate-Bus-Map-FE/src/api/busApi.js"
       },
       "phase3": {
         "phase": "archived",
@@ -243,7 +243,7 @@
     "session": {
       "startedAt": "2026-03-04T07:07:05.015Z",
       "onboardingCompleted": true,
-      "lastActivity": "2026-03-17T06:50:07.127Z"
+      "lastActivity": "2026-03-20T01:08:52.686Z"
     },
     "history": [
       {
@@ -1351,6 +1351,1164 @@
       },
       {
         "timestamp": "2026-03-17T06:50:07.127Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T06:54:14.155Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:01:14.555Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:01:23.006Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:09.314Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:13.419Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:23.980Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:34.267Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:42.189Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:49.303Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:15:55.733Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:16:04.321Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:16:09.730Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:18:32.560Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:18:37.739Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:18:42.213Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:19:01.114Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:19:22.459Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:19:32.967Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:19:38.968Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:19:50.636Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:21:27.165Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:28:03.659Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:28:11.711Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:28:18.951Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:28:31.323Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:28:41.813Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:28:52.544Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:29:04.939Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:29:16.807Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:29:30.525Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:33:32.158Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:33:42.791Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:33:51.629Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:34:01.711Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:34:11.188Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:34:22.848Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:34:33.504Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T07:35:15.577Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:14:34.927Z",
+        "feature": "dto",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:14:49.682Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:14:56.473Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:15:03.262Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:15:09.199Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:15:19.154Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:15:22.929Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:19:05.254Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:19:14.796Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:24:01.968Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:24:11.786Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:24:16.041Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:24:19.528Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:25:41.684Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T08:25:46.028Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:00:42.275Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:00:47.417Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:00:59.536Z",
+        "feature": "config",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:09:47.422Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:09:55.000Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:14:51.837Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:15:00.703Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:15:08.467Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:18:41.824Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:18:49.728Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:19:11.231Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:19:25.674Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:19:34.062Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:19:41.572Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:19:56.218Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:20:05.492Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:20:10.419Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:20:19.701Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:28:28.443Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:28:32.679Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:28:43.604Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:28:47.219Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:28:51.470Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:28:59.204Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:29:07.964Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:34:20.830Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:34:33.065Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:34:36.732Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:34:48.680Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:34:59.970Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:35:09.268Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:37:32.284Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:40:32.869Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:52:09.675Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:52:13.729Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:52:20.594Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T10:52:24.448Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:20:05.685Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:27:03.317Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:34:55.806Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:35:06.943Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:35:21.842Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:35:29.689Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:35:51.284Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:35:57.386Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:39:30.694Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:42:49.639Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:42:55.689Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:43:02.112Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:43:06.935Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:43:16.471Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:43:23.033Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-17T11:43:35.976Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T04:39:30.172Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T05:08:03.483Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T05:09:01.917Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T05:12:11.666Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T05:15:24.188Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T05:39:58.692Z",
+        "feature": "config",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:00:42.169Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:00:50.509Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:01:19.671Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:01:28.482Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:01:35.664Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:01:42.319Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:01:55.128Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:02:16.870Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:02:29.395Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:02:39.834Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:02:53.310Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:02:58.638Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:03:10.385Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:03:36.247Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T07:24:16.675Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-18T08:23:15.193Z",
+        "feature": "config",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T01:12:32.289Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T01:12:43.094Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T01:13:26.721Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T01:14:16.069Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T02:09:43.108Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T02:10:04.308Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T02:10:12.897Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T02:10:28.339Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T02:11:10.858Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T02:46:34.281Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T03:29:13.741Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T03:29:20.618Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T03:54:39.468Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:14:31.622Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:16:22.251Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:20:33.356Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:20:38.984Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:22:55.069Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:23:00.307Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:23:03.703Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:03.385Z",
+        "feature": "exception",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:10.479Z",
+        "feature": "climatebusmapbe",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:14.679Z",
+        "feature": "busapi",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:22.287Z",
+        "feature": "busapi",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:29.225Z",
+        "feature": "config",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:40.900Z",
+        "feature": "dto",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:48.780Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:33:52.018Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:06.199Z",
+        "feature": "service",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:17.515Z",
+        "feature": "climatebusmapbe",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:22.903Z",
+        "feature": "climatebusmapbe",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:31.939Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:41.492Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:46.710Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:53.222Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:34:57.150Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:35:18.301Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:35:52.184Z",
+        "feature": "dto",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T04:50:35.641Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T05:04:58.503Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T05:14:42.629Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T05:14:48.562Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T05:15:03.003Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T05:26:29.400Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T06:10:20.693Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T06:34:44.425Z",
+        "feature": "busapi",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T06:34:50.591Z",
+        "feature": "busapi",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T06:57:07.427Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T06:57:11.918Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:11:51.668Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:11:57.096Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:12:01.496Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:16:22.756Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:24:05.829Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:28:35.729Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-19T07:28:40.380Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T00:43:00.552Z",
+        "feature": "busapi",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T00:43:30.529Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:01:39.934Z",
+        "feature": "busapi",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:08:03.161Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:08:11.474Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:08:27.733Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:08:33.263Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:08:45.073Z",
+        "feature": "Climate-Bus-Map-FE",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-20T01:08:52.686Z",
         "feature": "Climate-Bus-Map-FE",
         "phase": "do",
         "action": "updated"

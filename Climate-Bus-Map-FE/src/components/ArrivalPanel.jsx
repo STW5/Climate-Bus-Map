@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ClimateBadge from './ClimateBadge';
 import { isFavorite } from '../utils/favorites';
 import { addFavoriteForUser, removeFavoriteForUser } from '../api/favoritesApi';
+import { logRide } from '../api/ridesApi';
 import { useAuth } from '../context/AuthContext';
 
 function SkeletonRow() {
@@ -73,13 +74,20 @@ function routeBadgeStyle(routeNo) {
   return { background: 'var(--green-primary)', color: '#fff' };
 }
 
-export default function ArrivalPanel({ station, arrivals, loading, error, onClose, onFavoriteChange }) {
+export default function ArrivalPanel({ station, arrivals, loading, error, onClose, onFavoriteChange, isClimateStation }) {
   const { isLoggedIn } = useAuth();
   const [favorited, setFavorited] = useState(false);
+  const [rideLogged, setRideLogged] = useState(false);
 
   useEffect(() => {
-    if (station) setFavorited(isFavorite(station.stationId));
+    if (station) { setFavorited(isFavorite(station.stationId)); setRideLogged(false); }
   }, [station]);
+
+  const handleLogRide = async () => {
+    const climateArrival = arrivals.find(a => a.climateEligible);
+    await logRide(climateArrival?.routeId ?? '', climateArrival?.routeNo ?? '', station?.stationId ?? '');
+    setRideLogged(true);
+  };
 
   const handleFavoriteToggle = async () => {
     if (!station) return;
@@ -118,6 +126,16 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
 
       {!loading && !error && arrivals.length > 0 && (
         <p className="arrival-count">{arrivals.length}개 노선 도착 예정</p>
+      )}
+
+      {isLoggedIn && isClimateStation && !loading && !error && arrivals.some(a => a.climateEligible) && (
+        <button
+          className={`ride-log-btn${rideLogged ? ' ride-log-btn--done' : ''}`}
+          onClick={handleLogRide}
+          disabled={rideLogged}
+        >
+          {rideLogged ? '✓ 탑승 기록 완료!' : '🚌 기후동행 탑승했어요'}
+        </button>
       )}
 
       <div className="panel-body">

@@ -2110,3 +2110,66 @@ body {
 
 .input--ok  { border-color: #16a34a !important; }
 .input--err { border-color: #e53e3e !important; }
+
+/* ─── Stats Panel ───────────────────────── */
+.stats-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+
+.stats-card {
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stats-card--green {
+  background: var(--green-light);
+}
+
+.stats-card__value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.stats-card--green .stats-card__value {
+  color: var(--green-primary);
+}
+
+.stats-card__label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ─── Ride Log Button ───────────────────── */
+.ride-log-btn {
+  width: calc(100% - 32px);
+  margin: 0 16px 12px;
+  padding: 11px 0;
+  background: var(--green-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ride-log-btn:active { opacity: 0.8; }
+
+.ride-log-btn--done {
+  background: var(--bg-page);
+  color: var(--green-primary);
+  cursor: default;
+}
