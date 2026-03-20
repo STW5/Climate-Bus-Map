@@ -46,20 +46,33 @@ function AppInner() {
   const [arrivalError, setArrivalError] = useState(null);
 
   const [favorites, setFavorites] = useState(getFavorites);
+
+  // isLoggedIn을 ref로 관리 → refreshFavorites를 stable하게 유지
+  const isLoggedInRef = useRef(isLoggedIn);
+  useEffect(() => { isLoggedInRef.current = isLoggedIn; }, [isLoggedIn]);
+
   const refreshFavorites = useCallback(() => {
-    getFavoritesForUser(isLoggedIn).then(setFavorites).catch(() => setFavorites(getFavorites()));
-  }, [isLoggedIn]);
+    getFavoritesForUser(isLoggedInRef.current).then(setFavorites).catch(() => setFavorites(getFavorites()));
+  }, []); // deps 없음 → stable reference, 무한렌더 방지
 
   // 로그인 상태 변경 시 즐겨찾기 갱신 + 첫 로그인 마이그레이션
-  const prevLoggedInRef = useRef(false);
+  const prevLoggedInRef = useRef(null); // null = 초기화 전
   useEffect(() => {
+    if (prevLoggedInRef.current === null) {
+      // 초기 로드 완료 시 (isLoading 끝난 후)
+      prevLoggedInRef.current = isLoggedIn;
+      refreshFavorites();
+      return;
+    }
     if (isLoggedIn && !prevLoggedInRef.current) {
+      // 로그인 전 → 후: 마이그레이션 후 서버 목록 로드
       migrateLocalToServer().finally(refreshFavorites);
-    } else if (!isLoggedIn) {
+    } else if (!isLoggedIn && prevLoggedInRef.current) {
+      // 로그아웃: 로컬 목록으로 복귀
       setFavorites(getFavorites());
     }
     prevLoggedInRef.current = isLoggedIn;
-  }, [isLoggedIn]); // eslint-disable-line
+  }, [isLoggedIn, refreshFavorites]);
 
   const [filterActive, setFilterActive] = useState(false);
 
@@ -346,7 +359,7 @@ function AppInner() {
       />
     );
   }, [
-    selectedPath, routePaths, routeLoading, selectedStation, activeTab, favorites,
+    selectedPath, routePaths, routeLoading, selectedStation, activeTab, favorites, isLoggedIn,
     arrivals, arrivalLoading, arrivalError, climateRoutes, climateLoading, climateError,
     boardingTimes, selectedBoardingTime, segmentBoardingTimes,
     handleRouteClose, handleStationClose, handleSelectPath, handleStationSelect, refreshFavorites,

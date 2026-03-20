@@ -2097,3 +2097,22 @@ body {
 .save-route-btn:disabled {
   opacity: 0.7;
 }
+
+/* ─── Login Modal Input Hints ───────────────── */
+.modal-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username-hint {
+  font-size: 12px;
+  padding: 0 2px;
+}
+
+.username-hint.checking { color: var(--text-muted); }
+.username-hint.taken    { color: #e53e3e; }
+.username-hint.available { color: #16a34a; }
+
+.input--ok  { border-color: #16a34a !important; }
+.input--err { border-color: #e53e3e !important; }

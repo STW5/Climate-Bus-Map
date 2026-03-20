@@ -23,16 +23,22 @@ public class AuthController {
     private final UserService userService;
     private final JwtProvider jwtProvider;
 
+    @GetMapping("/check-username")
+    public ApiResponse<Boolean> checkUsername(@RequestParam String username) {
+        return ApiResponse.ok(userService.isUsernameTaken(username));
+    }
+
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<UserResponse> signup(@RequestBody SignupRequest req) {
-        User user = userService.signup(req.email(), req.password(), req.nickname());
+    public ApiResponse<UserResponse> signup(@RequestBody SignupRequest req, HttpServletResponse res) {
+        User user = userService.signup(req.username(), req.password(), req.nickname());
+        setTokenCookies(res, user.getId());
         return ApiResponse.ok(UserResponse.from(user));
     }
 
     @PostMapping("/login")
     public ApiResponse<UserResponse> login(@RequestBody LoginRequest req, HttpServletResponse res) {
-        User user = userService.login(req.email(), req.password());
+        User user = userService.login(req.username(), req.password());
         setTokenCookies(res, user.getId());
         return ApiResponse.ok(UserResponse.from(user));
     }
@@ -54,8 +60,7 @@ public class AuthController {
             return ApiResponse.fail("INVALID_REFRESH_TOKEN");
         }
         Long userId = jwtProvider.getUserId(refreshToken);
-        String newAccess = jwtProvider.generateAccessToken(userId);
-        addCookie(res, "access_token", newAccess, 3600);
+        addCookie(res, "access_token", jwtProvider.generateAccessToken(userId), 3600);
         return ApiResponse.ok(null);
     }
 
@@ -73,13 +78,6 @@ public class AuthController {
     }
 
     private void addCookie(HttpServletResponse res, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
-        // SameSite=Lax 헤더는 Cookie API로 직접 못 세팅하므로 Set-Cookie 헤더로 추가
-        res.addCookie(cookie);
-        // SameSite 세팅 (Servlet Cookie API 미지원 → 직접 헤더 추가)
         String header = String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
                 name, value, maxAge);
         res.addHeader("Set-Cookie", header);

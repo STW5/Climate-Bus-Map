@@ -17,8 +17,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 200)
-    private String email;
+    @Column(nullable = false, unique = true, length = 50)
+    private String username; // 로그인 아이디
 
     @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
@@ -29,9 +29,9 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public static User create(String email, String passwordHash, String nickname) {
+    public static User create(String username, String passwordHash, String nickname) {
         User user = new User();
-        user.email = email;
+        user.username = username;
         user.passwordHash = passwordHash;
         user.nickname = nickname;
         return user;

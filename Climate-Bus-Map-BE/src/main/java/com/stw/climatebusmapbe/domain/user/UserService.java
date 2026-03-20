@@ -13,20 +13,24 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public User signup(String email, String rawPassword, String nickname) {
-        if (userRepository.existsByEmail(email)) {
-            throw new DuplicateEmailException("이미 사용 중인 이메일입니다.");
-        }
-        String hash = passwordEncoder.encode(rawPassword);
-        return userRepository.save(User.create(email, hash, nickname));
+    public boolean isUsernameTaken(String username) {
+        return userRepository.existsByUsername(username);
     }
 
-    public User login(String email, String rawPassword) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+    @Transactional
+    public User signup(String username, String rawPassword, String nickname) {
+        if (userRepository.existsByUsername(username)) {
+            throw new DuplicateEmailException("이미 사용 중인 아이디입니다.");
+        }
+        String hash = passwordEncoder.encode(rawPassword);
+        return userRepository.save(User.create(username, hash, nickname));
+    }
+
+    public User login(String username, String rawPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다."));
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
         return user;
     }
