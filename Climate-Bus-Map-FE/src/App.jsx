@@ -52,11 +52,9 @@ function AppInner() {
   const isLoggedInRef = useRef(isLoggedIn);
   useEffect(() => { isLoggedInRef.current = isLoggedIn; }, [isLoggedIn]);
 
-  // position, boardingTimes를 ref로 관리 → handleRouteSearch, handleSelectPath를 stable하게 유지
+  // position을 ref로 관리 → handleRouteSearch를 stable하게 유지
   const positionRef = useRef(position);
   useEffect(() => { positionRef.current = position; }, [position]);
-  const boardingTimesRef = useRef([]);
-  useEffect(() => { boardingTimesRef.current = boardingTimes; }, [boardingTimes]);
 
   const refreshFavorites = useCallback(() => {
     getFavoritesForUser(isLoggedInRef.current).then(setFavorites).catch(() => setFavorites(getFavorites()));
@@ -93,6 +91,8 @@ function AppInner() {
   const [routePaths, setRoutePaths] = useState([]);
   const [selectedPath, setSelectedPath] = useState(null);
   const [boardingTimes, setBoardingTimes] = useState([]);
+  const boardingTimesRef = useRef([]);
+  useEffect(() => { boardingTimesRef.current = boardingTimes; }, [boardingTimes]);
   const [selectedBoardingTime, setSelectedBoardingTime] = useState(null);
   const [segmentBoardingTimes, setSegmentBoardingTimes] = useState([]);
   const selectedPathRef = useRef(null);

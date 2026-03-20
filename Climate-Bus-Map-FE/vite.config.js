@@ -35,6 +35,7 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
+        cacheId: 'climatego-v2',
         importScripts: ['/sw-push.js'],
         runtimeCaching: [
           {
