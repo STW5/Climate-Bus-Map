@@ -11,7 +11,7 @@ npm run build
 echo "📤 서버 업로드 중..."
 rsync -az --delete dist/ stw@stw.iptime.org:/home/stw/climatego/frontend-dist/
 
-echo "🔄 nginx 리로드..."
-ssh stw@stw.iptime.org "docker exec climatego-frontend nginx -s reload"
+echo "🔄 nginx 재시작..."
+ssh stw@stw.iptime.org "cd /home/stw/climatego && docker compose restart frontend"
 
 echo "✅ 배포 완료!"
