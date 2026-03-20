@@ -1,12 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 
-/**
- * 드래그 가능한 바텀 시트
- * snapPoints: px 높이 배열 e.g. [100, 340, 680]
- * snapIndex: 현재 스냅 인덱스 (부모가 관리)
- * onSnapChange(idx): 스냅 변경 콜백
- * onClose(): peek 아래로 내릴 때 호출
- */
 export default function DraggableBottomSheet({
   snapPoints,
   snapIndex = 1,
@@ -15,7 +8,6 @@ export default function DraggableBottomSheet({
   hidden = false,
   children,
 }) {
-  const sheetRef = useRef(null);
   const handleRef = useRef(null);
   const scrollRef = useRef(null);
   const touchStartY = useRef(0);
@@ -26,31 +18,48 @@ export default function DraggableBottomSheet({
   const isDraggingRef = useRef(false);
   const wasDraggedRef = useRef(false);
 
+  // 렌더링용 state
   const [liveH, setLiveH] = useState(null);
   const [dragging, setDragging] = useState(false);
 
+  // 핸들러에서 최신 값을 읽기 위한 ref (콜백 재생성 없이)
+  const liveHRef = useRef(null);
+  const snapIndexRef = useRef(snapIndex);
+  const snapPointsRef = useRef(snapPoints);
+  const onSnapChangeRef = useRef(onSnapChange);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => { snapIndexRef.current = snapIndex; }, [snapIndex]);
+  useEffect(() => { snapPointsRef.current = snapPoints; }, [snapPoints]);
+  useEffect(() => { onSnapChangeRef.current = onSnapChange; }, [onSnapChange]);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
   const targetH = snapPoints[snapIndex] ?? snapPoints[0] ?? 100;
-  const displayH = liveH ?? targetH;
+  const targetHRef = useRef(targetH);
+  useEffect(() => { targetHRef.current = targetH; }, [targetH]);
 
-  // snapIndex가 외부에서 변경되면 liveH 리셋
-  useEffect(() => { setLiveH(null); }, [snapIndex]);
+  // snapIndex 외부 변경 시 liveH 리셋
+  useEffect(() => {
+    liveHRef.current = null;
+    setLiveH(null);
+  }, [snapIndex]);
 
+  // 모든 핸들러 deps [] → stable reference 유지
   const onTouchStart = useCallback((e) => {
     const isHandle = handleRef.current?.contains(e.target);
     const scroll = scrollRef.current;
-    // 핸들이 아니고, 내부 스크롤이 위가 아니면 드래그 시작 안 함
     if (!isHandle && scroll && scroll.scrollTop > 0) return;
 
     isDraggingRef.current = true;
     wasDraggedRef.current = false;
     setDragging(true);
-    const currentH = liveH ?? targetH;
+    const currentH = liveHRef.current ?? targetHRef.current;
     touchStartY.current = e.touches[0].clientY;
     touchStartH.current = currentH;
     lastY.current = e.touches[0].clientY;
     lastT.current = Date.now();
     vel.current = 0;
-  }, [liveH, targetH]);
+  }, []);
 
   const onTouchMove = useCallback((e) => {
     if (!isDraggingRef.current) return;
@@ -61,10 +70,11 @@ export default function DraggableBottomSheet({
 
     const now = Date.now();
     const dt = now - lastT.current;
-    if (dt > 0) vel.current = (lastY.current - y) / dt; // 양수=위, 음수=아래
+    if (dt > 0) vel.current = (lastY.current - y) / dt;
     lastY.current = y;
     lastT.current = now;
 
+    liveHRef.current = newH;
     setLiveH(newH);
   }, []);
 
@@ -73,53 +83,53 @@ export default function DraggableBottomSheet({
     isDraggingRef.current = false;
     setDragging(false);
 
-    const h = liveH ?? targetH;
+    const h = liveHRef.current ?? targetHRef.current;
     const v = vel.current;
+    const snapIdx = snapIndexRef.current;
+    const snaps = snapPointsRef.current;
 
-    // 빠른 아래 스와이프
     if (v < -0.5) {
-      if (snapIndex === 0) {
-        setLiveH(null);
-        onClose?.();
+      liveHRef.current = null;
+      setLiveH(null);
+      if (snapIdx === 0) {
+        onCloseRef.current?.();
       } else {
-        onSnapChange?.(snapIndex - 1);
-        setLiveH(null);
+        onSnapChangeRef.current?.(snapIdx - 1);
       }
       return;
     }
 
-    // 빠른 위 스와이프
     if (v > 0.5) {
-      const next = Math.min(snapPoints.length - 1, snapIndex + 1);
-      onSnapChange?.(next);
+      liveHRef.current = null;
       setLiveH(null);
+      onSnapChangeRef.current?.(Math.min(snaps.length - 1, snapIdx + 1));
       return;
     }
 
-    // 가장 가까운 스냅 포인트
     let closestIdx = 0;
     let minDist = Infinity;
-    snapPoints.forEach((s, i) => {
+    snaps.forEach((s, i) => {
       const d = Math.abs(h - s);
       if (d < minDist) { minDist = d; closestIdx = i; }
     });
 
-    if (closestIdx !== snapIndex) onSnapChange?.(closestIdx);
+    liveHRef.current = null;
     setLiveH(null);
-  }, [liveH, targetH, snapIndex, snapPoints, onClose, onSnapChange]);
+    if (closestIdx !== snapIdx) onSnapChangeRef.current?.(closestIdx);
+  }, []);
 
   const onTouchCancel = useCallback(() => {
     isDraggingRef.current = false;
     setDragging(false);
+    liveHRef.current = null;
     setLiveH(null);
   }, []);
 
-  // peek 상태(snap 0)에서는 pointer-events: none → 지도 터치 통과
+  const displayH = liveH ?? targetH;
   const isPeek = snapIndex === 0 && !dragging;
 
   return (
     <div
-      ref={sheetRef}
       className={`draggable-sheet${dragging ? ' draggable-sheet--dragging' : ''}${isPeek ? ' draggable-sheet--peek' : ''}${hidden ? ' draggable-sheet--hidden' : ''}`}
       style={{ height: hidden ? 0 : displayH }}
       onTouchStart={onTouchStart}
