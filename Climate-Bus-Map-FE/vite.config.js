@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
       devOptions: { enabled: false },
       manifest: {
@@ -31,28 +34,8 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
-        cleanupOutdatedCaches: true,
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\/v1\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: { maxEntries: 50, maxAgeSeconds: 300 },
-            },
-          },
-          {
-            urlPattern: /tmap\.co\.kr|tmapv2/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'tmap-tiles',
-              expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
-            },
-          },
-        ],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
       },
     }),
   ],

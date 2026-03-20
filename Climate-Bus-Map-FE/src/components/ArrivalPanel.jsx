@@ -4,6 +4,7 @@ import { isFavorite } from '../utils/favorites';
 import { addFavoriteForUser, removeFavoriteForUser } from '../api/favoritesApi';
 import { logRide } from '../api/ridesApi';
 import { useAuth } from '../context/AuthContext';
+import AlertSettingsModal from './AlertSettingsModal';
 
 function SkeletonRow() {
   return (
@@ -78,6 +79,7 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
   const { isLoggedIn } = useAuth();
   const [favorited, setFavorited] = useState(false);
   const [rideLogged, setRideLogged] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   useEffect(() => {
     if (station) { setFavorited(isFavorite(station.stationId)); setRideLogged(false); }
@@ -101,6 +103,14 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
   };
 
   return (
+    <>
+    {showAlertModal && (
+      <AlertSettingsModal
+        station={station}
+        arrivals={arrivals}
+        onClose={() => setShowAlertModal(false)}
+      />
+    )}
     <div className={`arrival-panel${station ? ' open' : ''}`}>
       <div className="drag-handle">
         <div className="drag-handle-bar" />
@@ -115,6 +125,14 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
             <button className="favorite-btn" onClick={handleFavoriteToggle} aria-label="즐겨찾기">
               <svg width="18" height="18" viewBox="0 0 24 24" fill={favorited ? '#f59e0b' : 'none'} stroke={favorited ? '#f59e0b' : 'var(--text-muted)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          )}
+          {isLoggedIn && station && (
+            <button className="favorite-btn" onClick={() => setShowAlertModal(true)} aria-label="알림 설정" title="도착 알림 설정">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
               </svg>
             </button>
           )}
@@ -164,5 +182,6 @@ export default function ArrivalPanel({ station, arrivals, loading, error, onClos
         ))}
       </div>
     </div>
+    </>
   );
 }

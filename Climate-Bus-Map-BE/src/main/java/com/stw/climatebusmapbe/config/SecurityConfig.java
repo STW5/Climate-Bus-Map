@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/stations/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/routes/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/climate-routes/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/push/vapid-public-key").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
