@@ -24,6 +24,7 @@ export default function DraggableBottomSheet({
   const lastT = useRef(0);
   const vel = useRef(0);
   const isDraggingRef = useRef(false);
+  const wasDraggedRef = useRef(false);
 
   const [liveH, setLiveH] = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -41,6 +42,7 @@ export default function DraggableBottomSheet({
     if (!isHandle && scroll && scroll.scrollTop > 0) return;
 
     isDraggingRef.current = true;
+    wasDraggedRef.current = false;
     setDragging(true);
     const currentH = liveH ?? targetH;
     touchStartY.current = e.touches[0].clientY;
@@ -54,6 +56,7 @@ export default function DraggableBottomSheet({
     if (!isDraggingRef.current) return;
     const y = e.touches[0].clientY;
     const delta = touchStartY.current - y;
+    if (Math.abs(delta) > 5) wasDraggedRef.current = true;
     const newH = Math.max(60, touchStartH.current + delta);
 
     const now = Date.now();
@@ -124,7 +127,15 @@ export default function DraggableBottomSheet({
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchCancel}
     >
-      <div className="drag-handle" ref={handleRef}>
+      <div
+        className="drag-handle"
+        ref={handleRef}
+        onClick={() => {
+          if (wasDraggedRef.current) return;
+          const next = snapIndex < snapPoints.length - 1 ? snapIndex + 1 : snapIndex - 1;
+          onSnapChange?.(next);
+        }}
+      >
         <div className="drag-handle-bar" />
       </div>
       <div className="sheet-inner" ref={scrollRef}>

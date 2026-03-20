@@ -96,7 +96,7 @@ export default function App() {
     setArrivals([]);
     setArrivalError(null);
     setArrivalLoading(true);
-    setSheetSnap(1); // half로 열기
+    setSheetSnap(2); // full로 열기
     try {
       const data = await fetchArrivals(station.stationId);
       const fetchedAt = Date.now();
