@@ -9,6 +9,8 @@ import SelectedRoutePanel from './components/SelectedRoutePanel';
 import DraggableBottomSheet from './components/DraggableBottomSheet';
 import BottomTabBar from './components/BottomTabBar';
 import FloatingSearchBar from './components/FloatingSearchBar';
+import LoginModal from './components/LoginModal';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { useGeolocation } from './hooks/useGeolocation';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
 import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
@@ -29,7 +31,9 @@ function useSnapPoints() {
   }, []);
 }
 
-export default function App() {
+function AppInner() {
+  const { user, isLoggedIn, logout } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
   const { position, isFallback } = useGeolocation();
 
   const [stations, setStations] = useState([]);
@@ -354,6 +358,21 @@ export default function App() {
         <FilterToggle active={filterActive} onToggle={() => setFilterActive((v) => !v)} />
       </div>
 
+      {/* ── 우측 상단 로그인/프로필 버튼 ── */}
+      {!tabBarHidden && (
+        <div className="auth-fab">
+          {isLoggedIn ? (
+            <button className="auth-fab__btn" onClick={logout} title={`${user?.nickname} (로그아웃)`}>
+              <span className="auth-fab__avatar">{user?.nickname?.[0] ?? '?'}</span>
+            </button>
+          ) : (
+            <button className="auth-fab__btn auth-fab__btn--login" onClick={() => setLoginOpen(true)}>
+              로그인
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ── 에러 토스트 ── */}
       {stationsError && (
         <div className="stations-error">정류장 로드 실패: {stationsError}</div>
@@ -376,6 +395,17 @@ export default function App() {
         onTabChange={handleTabChange}
         hidden={tabBarHidden}
       />
+
+      {/* ── 로그인 모달 ── */}
+      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
   );
 }

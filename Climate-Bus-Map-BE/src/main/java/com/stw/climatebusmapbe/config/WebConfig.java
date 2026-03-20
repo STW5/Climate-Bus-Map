@@ -7,14 +7,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    // CORS는 SecurityConfig의 CorsConfigurationSource에서 통합 관리
+    // Spring Security 필터 체인이 먼저 처리하므로 여기서는 설정 불필요
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins(
-                        "http://localhost:3000",
-                        "http://stw.iptime.org:3002",
-                        "https://climatego.duckdns.org"
-                )
-                .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
 }

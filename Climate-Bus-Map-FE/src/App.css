@@ -1870,3 +1870,146 @@ body {
   color: var(--text-primary);
   letter-spacing: -0.3px;
 }
+
+/* ─── Auth FAB (우측 상단 로그인/프로필) ──── */
+.auth-fab {
+  position: fixed;
+  top: calc(14px + var(--safe-top));
+  right: 14px;
+  z-index: 210;
+}
+
+.auth-fab__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  min-width: 36px;
+  padding: 0 10px;
+  background: rgba(255,255,255,0.95);
+  border: none;
+  border-radius: 18px;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  touch-action: manipulation;
+}
+
+.auth-fab__btn--login {
+  color: var(--green-primary);
+  padding: 0 14px;
+}
+
+.auth-fab__avatar {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green-primary);
+  text-transform: uppercase;
+}
+
+/* ─── 로그인 모달 ───────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 400;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 20px 20px calc(24px + var(--safe-bottom));
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.22s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: var(--bg-page);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.modal-tab {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.modal-tab--active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  color: var(--text-primary);
+  background: var(--bg-page);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.modal-input:focus {
+  border-color: var(--green-primary);
+  background: #fff;
+}
+
+.modal-error {
+  font-size: 13px;
+  color: #e53e3e;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.modal-submit {
+  margin-top: 4px;
+  padding: 14px;
+  background: var(--green-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 0.15s;
+}
+
+.modal-submit:disabled {
+  opacity: 0.6;
+}

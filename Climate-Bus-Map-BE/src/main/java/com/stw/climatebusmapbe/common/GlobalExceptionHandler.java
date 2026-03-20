@@ -2,6 +2,7 @@ package com.stw.climatebusmapbe.common;
 
 import com.stw.climatebusmapbe.common.exception.ApiRateLimitException;
 import com.stw.climatebusmapbe.common.exception.BusApiException;
+import com.stw.climatebusmapbe.common.exception.DuplicateEmailException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +14,12 @@ import org.springframework.web.client.RestClientResponseException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiResponse<Void> handleDuplicateEmail(DuplicateEmailException e) {
+        return ApiResponse.fail(e.getMessage());
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
