@@ -4,10 +4,12 @@ import com.stw.climatebusmapbe.domain.alert.PushSubscription;
 import lombok.extern.slf4j.Slf4j;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Security;
 
 @Slf4j
 @Component
@@ -19,6 +21,9 @@ public class WebPushAdapter {
             @Value("${vapid.public-key}") String vapidPublicKey,
             @Value("${vapid.private-key}") String vapidPrivateKey,
             @Value("${vapid.subject}") String vapidSubject) throws Exception {
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
         this.pushService = new PushService(vapidPublicKey, vapidPrivateKey)
                 .setSubject(vapidSubject);
     }
