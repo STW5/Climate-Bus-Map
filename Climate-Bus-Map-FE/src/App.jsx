@@ -17,6 +17,7 @@ import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
 import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
 import { getFavorites } from './utils/favorites';
+import { getFavoritesForUser, removeFavoriteForUser, migrateLocalToServer } from './api/favoritesApi';
 import './App.css';
 
 // 바텀 시트 스냅 포인트 (peek / half / full)
@@ -44,7 +45,20 @@ function AppInner() {
   const [arrivalError, setArrivalError] = useState(null);
 
   const [favorites, setFavorites] = useState(getFavorites);
-  const refreshFavorites = useCallback(() => setFavorites(getFavorites()), []);
+  const refreshFavorites = useCallback(() => {
+    getFavoritesForUser(isLoggedIn).then(setFavorites).catch(() => setFavorites(getFavorites()));
+  }, [isLoggedIn]);
+
+  // 로그인 상태 변경 시 즐겨찾기 갱신 + 첫 로그인 마이그레이션
+  const prevLoggedInRef = useRef(false);
+  useEffect(() => {
+    if (isLoggedIn && !prevLoggedInRef.current) {
+      migrateLocalToServer().finally(refreshFavorites);
+    } else if (!isLoggedIn) {
+      setFavorites(getFavorites());
+    }
+    prevLoggedInRef.current = isLoggedIn;
+  }, [isLoggedIn]); // eslint-disable-line
 
   const [filterActive, setFilterActive] = useState(false);
 
@@ -302,6 +316,7 @@ function AppInner() {
           favorites={favorites}
           onStationSelect={handleStationSelect}
           onFavoriteChange={refreshFavorites}
+          onLoginRequest={() => setLoginOpen(true)}
         />
       );
     }

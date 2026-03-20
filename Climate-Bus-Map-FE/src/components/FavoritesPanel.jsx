@@ -1,4 +1,5 @@
-import { removeFavorite } from '../utils/favorites';
+import { useAuth } from '../context/AuthContext';
+import { removeFavoriteForUser } from '../api/favoritesApi';
 
 function StarIcon() {
   return (
@@ -8,12 +9,12 @@ function StarIcon() {
   );
 }
 
-export default function FavoritesPanel({ favorites, onStationSelect, onFavoriteChange }) {
-  if (favorites.length === 0) return null;
+export default function FavoritesPanel({ favorites, onStationSelect, onFavoriteChange, onLoginRequest }) {
+  const { isLoggedIn } = useAuth();
 
-  const handleRemove = (e, stationId) => {
+  const handleRemove = async (e, stationId) => {
     e.stopPropagation();
-    removeFavorite(stationId);
+    await removeFavoriteForUser(stationId, isLoggedIn);
     onFavoriteChange?.();
   };
 
@@ -22,25 +23,35 @@ export default function FavoritesPanel({ favorites, onStationSelect, onFavoriteC
       <div className="panel-section-title">
         <StarIcon />
         즐겨찾기 정류장
+        {!isLoggedIn && (
+          <button className="favorites-login-hint" onClick={onLoginRequest}>
+            로그인하면 기기 간 동기화
+          </button>
+        )}
       </div>
-      <div className="climate-routes-list">
-        {favorites.map((station) => (
-          <div
-            key={station.stationId}
-            className="climate-route-item"
-            onClick={() => onStationSelect(station)}
-          >
-            <span className="climate-route-name">{station.stationName}</span>
-            <button
-              className="favorite-remove-btn"
-              onClick={(e) => handleRemove(e, station.stationId)}
-              aria-label="즐겨찾기 해제"
+
+      {favorites.length === 0 ? (
+        <p className="favorites-empty">즐겨찾기한 정류장이 없습니다.</p>
+      ) : (
+        <div className="climate-routes-list">
+          {favorites.map((station) => (
+            <div
+              key={station.stationId}
+              className="climate-route-item"
+              onClick={() => onStationSelect(station)}
             >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
+              <span className="climate-route-name">{station.stationName}</span>
+              <button
+                className="favorite-remove-btn"
+                onClick={(e) => handleRemove(e, station.stationId)}
+                aria-label="즐겨찾기 해제"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

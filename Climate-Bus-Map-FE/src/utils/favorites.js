@@ -23,3 +23,7 @@ export function removeFavorite(stationId) {
 export function isFavorite(stationId) {
   return getFavorites().some((s) => s.stationId === stationId);
 }
+
+export function clearLocalFavorites() {
+  localStorage.removeItem(KEY);
+}

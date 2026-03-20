@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import ClimateBadge from './ClimateBadge';
-import { isFavorite, addFavorite, removeFavorite } from '../utils/favorites';
+import { isFavorite } from '../utils/favorites';
+import { addFavoriteForUser, removeFavoriteForUser } from '../api/favoritesApi';
+import { useAuth } from '../context/AuthContext';
 
 function SkeletonRow() {
   return (
@@ -72,18 +74,19 @@ function routeBadgeStyle(routeNo) {
 }
 
 export default function ArrivalPanel({ station, arrivals, loading, error, onClose, onFavoriteChange }) {
+  const { isLoggedIn } = useAuth();
   const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
     if (station) setFavorited(isFavorite(station.stationId));
   }, [station]);
 
-  const handleFavoriteToggle = () => {
+  const handleFavoriteToggle = async () => {
     if (!station) return;
     if (favorited) {
-      removeFavorite(station.stationId);
+      await removeFavoriteForUser(station.stationId, isLoggedIn);
     } else {
-      addFavorite({ stationId: station.stationId, stationName: station.stationName, lat: station.lat, lng: station.lng });
+      await addFavoriteForUser({ stationId: station.stationId, stationName: station.stationName, arsId: station.arsId, lat: station.lat, lng: station.lng }, isLoggedIn);
     }
     setFavorited(!favorited);
     onFavoriteChange?.();
