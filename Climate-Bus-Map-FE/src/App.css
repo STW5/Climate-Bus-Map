@@ -180,14 +180,6 @@ body {
 }
 
 
-.sheet-inner .climate-panel {
-  position: static !important;
-  box-shadow: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  width: 100% !important;
-  padding: 8px 16px 4px;
-}
 
 .sheet-inner .climate-routes-panel {
   position: static !important;
@@ -959,22 +951,29 @@ body {
 /* ─── Climate Routes Panel (D-02) ───────── */
 .climate-panel {
   position: absolute;
-  bottom: 24px;
-  left: 16px;
+  bottom: calc(56px + var(--safe-bottom) + 10px); /* 탭바 위 */
+  left: 12px;
   background: var(--bg-card);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  padding: 9px 11px 11px;
+  padding: 7px 10px 8px;
   width: fit-content;
+  max-width: 240px;
   z-index: 10;
   border: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .climate-panel {
+    bottom: 20px; /* 데스크탑: 탭바 없음 */
+  }
 }
 
 .climate-panel__header {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 5px;
 }
 
 .climate-panel__title {

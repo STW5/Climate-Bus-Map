@@ -350,14 +350,7 @@ function AppInner() {
       }
       return <SavedRoutesPanel onRouteRestore={(detail) => { handleSelectPath(detail.routeJson, 0); }} />;
     }
-    return (
-      <ClimateRoutesPanel
-        routes={climateRoutes}
-        loading={climateLoading}
-        error={climateError}
-        apiLimitExceeded={climateApiLimitExceeded}
-      />
-    );
+    return null;
   }, [
     selectedPath, routePaths, routeLoading, selectedStation, activeTab, favorites, isLoggedIn,
     arrivals, arrivalLoading, arrivalError, climateRoutes, climateLoading, climateError,
@@ -418,6 +411,16 @@ function AppInner() {
         </div>
       )}
 
+      {/* ── 주변 기후동행 노선 오버레이 (지도 좌측 하단) ── */}
+      {!tabBarHidden && !selectedStation && (
+        <ClimateRoutesPanel
+          routes={climateRoutes}
+          loading={climateLoading}
+          error={climateError}
+          apiLimitExceeded={climateApiLimitExceeded}
+        />
+      )}
+
       {/* ── 에러 토스트 ── */}
       {stationsError && (
         <div className="stations-error">정류장 로드 실패: {stationsError}</div>
@@ -429,7 +432,7 @@ function AppInner() {
         snapIndex={sheetSnap}
         onSnapChange={setSheetSnap}
         onClose={handleSheetClose}
-        hidden={!hasClimateContent && activeTab === 'nearby' && !selectedStation && !selectedPath && routePaths.length === 0 && !routeLoading}
+        hidden={(activeTab === 'nearby' && !selectedStation && !selectedPath && routePaths.length === 0 && !routeLoading)}
       >
         {sheetContent}
       </DraggableBottomSheet>
