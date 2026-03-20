@@ -137,7 +137,7 @@ export default function MapView({ center, stations, onStationSelect, routePath }
     mapEl.addEventListener('touchmove', onTM,  { passive: true, capture: true });
     mapEl.addEventListener('touchend',   onTE,  { passive: true, capture: true });
     touchListenersRef.current = { mapEl, onTS, onTM, onTE };
-  }, [tmapReady]);  // map 초기화 후 1회만 실행
+  }, [tmapReady, center]);  // map 초기화 후 1회만 실행 (center 의존 추가: TMap보다 위치가 늦게 오는 경우 대비)
 
   // 언마운트 시에만 지도 정리
   useEffect(() => {

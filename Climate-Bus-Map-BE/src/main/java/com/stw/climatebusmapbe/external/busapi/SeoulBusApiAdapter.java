@@ -45,15 +45,23 @@ public class SeoulBusApiAdapter implements BusApiPort {
     public List<BusArrivalDto> getArrivals(String stationId) {
         log.info("도착 정보 조회: stationId={}", stationId);
 
-        URI uri = UriComponentsBuilder.fromUriString(baseUrl + "/arrive/getArrInfoByStId")
+        URI uri = UriComponentsBuilder.fromUriString(baseUrl + "/arrive/getLowArrInfoByStId")
                 .queryParam("serviceKey", apiKey)
                 .queryParam("stId", stationId)
                 .build(true).toUri();
         log.info("요청 URL: {}", uri);
 
-        String xml = restClient.get().uri(uri).retrieve().body(String.class);
-        log.debug("도착정보 XML 응답: {}", xml);
-        return parseArrivals(xml);
+        try {
+            String xml = restClient.get().uri(uri).retrieve().body(String.class);
+            log.debug("도착정보 XML 응답: {}", xml);
+            return parseArrivals(xml);
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            log.warn("도착정보 API HTTP 오류 (stationId={}, status={}): 빈 목록 반환", stationId, e.getStatusCode());
+            return List.of();
+        } catch (org.springframework.web.client.RestClientException e) {
+            log.warn("도착정보 API 연결 오류 (stationId={}): {} — 빈 목록 반환", stationId, e.getMessage());
+            return List.of();
+        }
     }
 
     private List<BusArrivalDto> parseArrivals(String xml) {
