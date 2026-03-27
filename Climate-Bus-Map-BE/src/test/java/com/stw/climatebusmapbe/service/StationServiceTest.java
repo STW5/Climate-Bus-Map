@@ -18,6 +18,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +35,7 @@ class StationServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(coordinateConverter.toTM(anyDouble(), anyDouble())).thenReturn(new double[]{198010.0, 452340.0});
+        lenient().when(coordinateConverter.toTM(anyDouble(), anyDouble())).thenReturn(new double[]{198010.0, 452340.0});
     }
 
     @Test

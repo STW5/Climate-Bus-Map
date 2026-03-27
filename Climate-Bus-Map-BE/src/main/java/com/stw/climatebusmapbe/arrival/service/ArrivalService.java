@@ -40,7 +40,7 @@ public class ArrivalService {
      * - N 시작 → 심야버스 (✅)
      * - 숫자만 → 간선·지선·순환버스 (✅)
      */
-    static boolean isClimateEligible(String routeNo) {
+    public static boolean isClimateEligible(String routeNo) {
         if (routeNo == null || routeNo.isBlank()) return false;
         String no = routeNo.trim();
         if (no.matches(".*[가-힣].*")) return false;           // 마을버스

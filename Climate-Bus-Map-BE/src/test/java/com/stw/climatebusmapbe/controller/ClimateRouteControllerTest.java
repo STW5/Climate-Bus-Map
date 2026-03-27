@@ -1,5 +1,6 @@
 package com.stw.climatebusmapbe.controller;
 
+import com.stw.climatebusmapbe.common.security.JwtProvider;
 import com.stw.climatebusmapbe.route.controller.ClimateRouteController;
 import com.stw.climatebusmapbe.route.dto.ClimateRouteResponse;
 import com.stw.climatebusmapbe.route.service.ClimateRouteService;
@@ -24,6 +25,9 @@ class ClimateRouteControllerTest {
 
     @MockitoBean
     ClimateRouteService climateRouteService;
+
+    @MockitoBean
+    JwtProvider jwtProvider;
 
     @Test
     void getClimateRoutes_성공_응답구조확인() throws Exception {
