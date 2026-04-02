@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,9 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
+
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
 
     @GetMapping("/check-username")
     public ApiResponse<Boolean> checkUsername(@RequestParam String username) {
@@ -79,13 +83,15 @@ public class AuthController {
     }
 
     private void addCookie(HttpServletResponse res, String name, String value, int maxAge) {
-        String header = String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=Lax",
-                name, value, maxAge);
+        String secure = cookieSecure ? "; Secure" : "";
+        String header = String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly%s; SameSite=Lax",
+                name, value, maxAge, secure);
         res.addHeader("Set-Cookie", header);
     }
 
     private void clearCookie(HttpServletResponse res, String name) {
-        String header = String.format("%s=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax", name);
+        String secure = cookieSecure ? "; Secure" : "";
+        String header = String.format("%s=; Path=/; Max-Age=0; HttpOnly%s; SameSite=Lax", name, secure);
         res.addHeader("Set-Cookie", header);
     }
 
