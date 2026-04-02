@@ -1,3 +1,11 @@
 package com.stw.climatebusmapbe.web.auth.dto;
 
-public record LoginRequest(String username, String password) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginRequest(
+        @NotBlank(message = "아이디를 입력해 주세요")
+        String username,
+
+        @NotBlank(message = "비밀번호를 입력해 주세요")
+        String password
+) {}

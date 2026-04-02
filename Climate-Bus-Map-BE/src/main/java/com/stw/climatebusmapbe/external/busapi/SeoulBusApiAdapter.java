@@ -17,6 +17,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class SeoulBusApiAdapter implements BusApiPort {
                 .queryParam("serviceKey", apiKey)
                 .queryParam("stId", stationId)
                 .build(true).toUri();
-        log.info("요청 URL: {}", uri);
+        log.debug("도착정보 요청: stationId={}", stationId);
 
         try {
             String xml = restClient.get().uri(uri).retrieve().body(String.class);
@@ -99,7 +100,14 @@ public class SeoulBusApiAdapter implements BusApiPort {
     }
 
     private Document parse(String xml) throws Exception {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        // XXE 방어 설정
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        DocumentBuilder builder = factory.newDocumentBuilder();
         return builder.parse(new InputSource(new StringReader(xml)));
     }
 
@@ -123,7 +131,7 @@ public class SeoulBusApiAdapter implements BusApiPort {
                 .queryParam("tmY", lat)
                 .queryParam("radius", radius)
                 .build(true).toUri();
-        log.info("요청 URL: {}", uri);
+        log.debug("정류소 위치 요청: lng={}, lat={}, radius={}", lng, lat, radius);
 
         String xml = restClient.get().uri(uri).retrieve().body(String.class);
         log.debug("정류소 조회 응답: {}", xml);

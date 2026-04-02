@@ -5,6 +5,7 @@ import com.stw.climatebusmapbe.common.exception.BusApiException;
 import com.stw.climatebusmapbe.common.exception.DuplicateEmailException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,6 +15,16 @@ import org.springframework.web.client.RestClientResponseException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleValidation(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getDefaultMessage())
+                .findFirst()
+                .orElse("입력값이 올바르지 않습니다.");
+        return ApiResponse.fail(message);
+    }
 
     @ExceptionHandler(DuplicateEmailException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
@@ -51,7 +62,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ApiResponse<Void> handleRestClientException(RestClientException e) {
         log.error("서울 버스 API 연결 오류: {}", e.getMessage());
-        return ApiResponse.fail("서울 버스 API 연결 실패: " + e.getMessage());
+        return ApiResponse.fail("서울 버스 API 연결 실패");
     }
 
     @ExceptionHandler(Exception.class)

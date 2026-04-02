@@ -32,8 +32,7 @@ public class RideLogService {
         long thisMonth = rideLogRepository.countByUserIdAndDateBetween(userId, monthStart, today);
         long lastMonth = rideLogRepository.countByUserIdAndDateBetween(userId, lastMonthStart, lastMonthEnd);
         long total = rideLogRepository.countByUserId(userId);
-        List<RideLog> recent = rideLogRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream().limit(10).toList();
+        List<RideLog> recent = rideLogRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId);
 
         return new RideStats(thisMonth, lastMonth, total, recent);
     }

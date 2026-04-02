@@ -10,6 +10,7 @@ import com.stw.climatebusmapbe.web.auth.dto.UserResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,14 +31,14 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<UserResponse> signup(@RequestBody SignupRequest req, HttpServletResponse res) {
+    public ApiResponse<UserResponse> signup(@Valid @RequestBody SignupRequest req, HttpServletResponse res) {
         User user = userService.signup(req.username(), req.password(), req.nickname());
         setTokenCookies(res, user.getId());
         return ApiResponse.ok(UserResponse.from(user));
     }
 
     @PostMapping("/login")
-    public ApiResponse<UserResponse> login(@RequestBody LoginRequest req, HttpServletResponse res) {
+    public ApiResponse<UserResponse> login(@Valid @RequestBody LoginRequest req, HttpServletResponse res) {
         User user = userService.login(req.username(), req.password());
         setTokenCookies(res, user.getId());
         return ApiResponse.ok(UserResponse.from(user));
@@ -78,13 +79,13 @@ public class AuthController {
     }
 
     private void addCookie(HttpServletResponse res, String name, String value, int maxAge) {
-        String header = String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+        String header = String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=Lax",
                 name, value, maxAge);
         res.addHeader("Set-Cookie", header);
     }
 
     private void clearCookie(HttpServletResponse res, String name) {
-        String header = String.format("%s=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax", name);
+        String header = String.format("%s=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax", name);
         res.addHeader("Set-Cookie", header);
     }
 
