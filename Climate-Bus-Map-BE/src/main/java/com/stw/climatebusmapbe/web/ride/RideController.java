@@ -1,9 +1,10 @@
 package com.stw.climatebusmapbe.web.ride;
 
 import com.stw.climatebusmapbe.common.ApiResponse;
-import com.stw.climatebusmapbe.domain.ride.RideLog;
 import com.stw.climatebusmapbe.domain.ride.RideLogService;
 import com.stw.climatebusmapbe.domain.ride.RideLogService.RideStats;
+import com.stw.climatebusmapbe.web.ride.dto.LogRideRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/v1/rides")
@@ -23,12 +25,9 @@ public class RideController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Void> logRide(
             @AuthenticationPrincipal Long userId,
-            @RequestBody Map<String, String> body) {
+            @Valid @RequestBody LogRideRequest body) {
         if (userId == null) return ApiResponse.fail("UNAUTHORIZED");
-        rideLogService.logRide(userId,
-                body.get("routeId"),
-                body.get("routeName"),
-                body.get("stationId"));
+        rideLogService.logRide(userId, body.routeId(), body.routeName(), body.stationId());
         return ApiResponse.ok(null);
     }
 

@@ -5,6 +5,8 @@ import com.stw.climatebusmapbe.domain.alert.AlertService;
 import com.stw.climatebusmapbe.web.push.dto.AlertSettingRequest;
 import com.stw.climatebusmapbe.web.push.dto.AlertSettingResponse;
 import com.stw.climatebusmapbe.web.push.dto.PushSubscribeRequest;
+import com.stw.climatebusmapbe.web.push.dto.UnsubscribeRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -39,8 +41,8 @@ public class PushController {
 
     @DeleteMapping("/subscribe")
     public ApiResponse<Void> unsubscribe(@AuthenticationPrincipal Long userId,
-                                         @RequestBody Map<String, String> body) {
-        alertService.unsubscribe(userId, body.get("endpoint"));
+                                         @Valid @RequestBody UnsubscribeRequest body) {
+        alertService.unsubscribe(userId, body.endpoint());
         return ApiResponse.ok(null);
     }
 
