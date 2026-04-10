@@ -56,10 +56,14 @@ export default function FloatingSearchBar({
 
   const depDebounce = useRef(null);
   const destDebounce = useRef(null);
+  const destInputRef = useRef(null);
 
-  // 경로 탭 → 자동 확장
+  // 경로 탭 → 자동 확장 (forceOpen 시에만 키보드도 열기)
   useEffect(() => {
-    if (forceOpen && !open) setOpen(true);
+    if (forceOpen && !open) {
+      setOpen(true);
+      setTimeout(() => destInputRef.current?.focus(), 50);
+    }
     if (!forceOpen && open && !destSelected) {
       setOpen(false);
     }
@@ -131,7 +135,7 @@ export default function FloatingSearchBar({
     <div className="floating-search-bar">
       {/* 축약 상태 */}
       {!isExpanded && (
-        <button className="floating-search-collapsed" onClick={() => setOpen(true)}>
+        <button className="floating-search-collapsed" onClick={() => { setOpen(true); setTimeout(() => destInputRef.current?.focus(), 50); }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--text-muted)' }}>
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
@@ -190,10 +194,10 @@ export default function FloatingSearchBar({
           <div className="header-search-row">
             <span className="header-search-dot header-search-dot--dest" />
             <input
+              ref={destInputRef}
               className="header-search-row-input"
               placeholder="목적지를 입력하세요"
               value={destQuery}
-              autoFocus={!depEditing}
               onChange={e => { setDestQuery(e.target.value); setDestSelected(null); setDepEditing(false); }}
               onFocus={() => setDestFocused(true)}
               onBlur={() => setTimeout(() => setDestFocused(false), 150)}
