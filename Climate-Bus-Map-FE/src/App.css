@@ -991,48 +991,50 @@ body {
   gap: 6px;
 }
 
+.climate-panel__dist {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
 .climate-panel__list {
   list-style: none;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px 10px;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .climate-panel__item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
 }
 
-.climate-panel__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green-primary);
+.climate-panel__badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
-.climate-panel__route-no {
+.climate-panel__time {
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.3px;
-}
-
-.climate-panel__route-type {
-  font-size: 10px;
-  color: var(--text-muted);
-  background: var(--bg-page);
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-
-.climate-panel__limit-msg {
   font-size: 12px;
+}
+
+.climate-panel__time--second {
+  font-weight: 400;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin: 4px 0 0;
+}
+
+.climate-panel__empty {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 2px 0 0;
 }
 
 /* ─── Route Search Toggle (헤더 버튼) ───── */

@@ -83,7 +83,6 @@ function AppInner() {
   const [climateRoutes, setClimateRoutes] = useState([]);
   const [climateStationIds, setClimateStationIds] = useState(new Set());
   const [climateLoading, setClimateLoading] = useState(false);
-  const [climateError, setClimateError] = useState(null);
   const [climateApiLimitExceeded, setClimateApiLimitExceeded] = useState(false);
 
   const [routeLoading, setRouteLoading] = useState(false);
@@ -148,6 +147,38 @@ function AppInner() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  // ── 가장 가까운 정류장 + 도착 정보 ──────────────────
+  const nearestStation = useMemo(() => {
+    if (!position || stations.length === 0) return null;
+    return stations.reduce((a, b) => {
+      const da = Math.hypot((a.lat - position.lat) * 111000, (a.lng - position.lng) * 88000);
+      const db = Math.hypot((b.lat - position.lat) * 111000, (b.lng - position.lng) * 88000);
+      return da < db ? a : b;
+    });
+  }, [position, stations]);
+
+  const [nearestArrivals, setNearestArrivals] = useState([]);
+  const [nearestLoading, setNearestLoading] = useState(false);
+
+  useEffect(() => {
+    if (!nearestStation) return;
+    setNearestLoading(true);
+    fetchArrivals(nearestStation.stationId)
+      .then(data => { const t = Date.now(); setNearestArrivals(data.map(a => ({ ...a, fetchedAt: t }))); })
+      .catch(() => setNearestArrivals([]))
+      .finally(() => setNearestLoading(false));
+  }, [nearestStation?.stationId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!nearestStation) return;
+    const id = setInterval(() => {
+      fetchArrivals(nearestStation.stationId)
+        .then(data => { const t = Date.now(); setNearestArrivals(data.map(a => ({ ...a, fetchedAt: t }))); })
+        .catch(() => {});
+    }, 30000);
+    return () => clearInterval(id);
+  }, [nearestStation?.stationId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── 데이터 페칭 ──────────────────────────────────
   useEffect(() => {
     if (!position) return;
@@ -160,14 +191,13 @@ function AppInner() {
   useEffect(() => {
     if (!position) return;
     setClimateLoading(true);
-    setClimateError(null);
     fetchNearbyClimateRoutes(position.lat, position.lng)
       .then((data) => {
         setClimateRoutes(data.routes || []);
         setClimateStationIds(new Set(data.climateStationIds || []));
         setClimateApiLimitExceeded(data.apiLimitExceeded || false);
       })
-      .catch((e) => setClimateError(e.message))
+      .catch(() => {})
       .finally(() => setClimateLoading(false));
   }, [position]);
 
@@ -467,13 +497,13 @@ function AppInner() {
         </div>
       )}
 
-      {/* ── 주변 기후동행 노선 오버레이 (지도 좌측 하단) ── */}
+      {/* ── 가장 가까운 정류장 패널 (지도 좌측 하단) ── */}
       {!tabBarHidden && !selectedStation && (
         <ClimateRoutesPanel
-          routes={climateRoutes}
-          loading={climateLoading}
-          error={climateError}
-          apiLimitExceeded={climateApiLimitExceeded}
+          station={nearestStation}
+          arrivals={nearestArrivals}
+          loading={nearestLoading}
+          position={position}
         />
       )}
 
