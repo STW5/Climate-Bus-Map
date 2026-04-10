@@ -453,7 +453,7 @@ function AppInner() {
       </div>
 
       {/* ── 우측 상단 로그인/프로필 버튼 ── */}
-      {!tabBarHidden && (
+      {!tabBarHidden && !searchOpen && (
         <div className="auth-fab">
           {isLoggedIn ? (
             <button className="auth-fab__btn" onClick={logout} title={`${user?.nickname} (로그아웃)`}>
