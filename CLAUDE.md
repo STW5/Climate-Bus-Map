@@ -118,6 +118,6 @@
 ---
 
 ## 기술 스택 & 키 정보
-- 공공 API 키: `7c3ccdd52aa1a760b60bbc0a5c829f896105b1f77efaafd8badbaa150986d860`
+- 공공 API 키: `SEOUL_BUS_API_KEY` (BE .env)
 - ODsay API 키: `VITE_ODSAY_API_KEY` (FE .env)
 - 서울 버스 API: `ws.bus.go.kr`
