@@ -465,7 +465,7 @@ function AppInner() {
 
       {/* ── Floating 검색바 ── */}
       <FloatingSearchBar
-        forceOpen={activeTab === 'route' && !selectedPath && !routePaths.length}
+        forceOpen={activeTab === 'route' && !selectedPath && !routePaths.length && !routeLoading}
         onSearch={handleRouteSearch}
         onClear={handleRouteClose}
         currentPosition={position}
