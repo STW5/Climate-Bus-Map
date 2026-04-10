@@ -380,6 +380,7 @@ function AppInner() {
             stations={displayedStations}
             onStationSelect={handleStationSelect}
             routePath={selectedPath}
+            bottomPadding={snapPoints[sheetSnap]}
           />
         ) : (
           <div className="loading-screen">

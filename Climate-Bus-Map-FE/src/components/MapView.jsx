@@ -35,7 +35,7 @@ const makeMyLocationIcon = () => {
   return 'data:image/svg+xml,' + encodeURIComponent(svg);
 };
 
-export default function MapView({ center, stations, onStationSelect, routePath }) {
+export default function MapView({ center, stations, onStationSelect, routePath, bottomPadding = 0 }) {
   const tmapReady = useTmapReady();
   const mapRef = useRef(null);
   const wrapperRef = useRef(null);          // map-container-wrapper div ref
@@ -378,7 +378,7 @@ export default function MapView({ center, stations, onStationSelect, routePath }
   }
 
   return (
-    <div className="map-container-wrapper" ref={wrapperRef}>
+    <div className="map-container-wrapper" ref={wrapperRef} style={{ paddingBottom: bottomPadding }}>
       <div id="map-container" style={{ width: '100%', height: '100%' }} />
       <button className="gps-btn" onClick={handleRecenter} aria-label="내 위치로">
         <GpsIcon />
