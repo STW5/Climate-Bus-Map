@@ -105,6 +105,49 @@ function AppInner() {
   // 탭바 숨김: 경로 결과/선택 중
   const tabBarHidden = !!selectedPath || routePaths.length > 0 || routeLoading;
 
+  // ── 모바일 뒤로가기 처리 ──────────────────────────
+  const selectedPathRef2 = useRef(selectedPath);
+  const routePathsRef = useRef(routePaths);
+  const selectedStationRef2 = useRef(selectedStation);
+  useEffect(() => { selectedPathRef2.current = selectedPath; }, [selectedPath]);
+  useEffect(() => { routePathsRef.current = routePaths; }, [routePaths]);
+  useEffect(() => { selectedStationRef2.current = selectedStation; }, [selectedStation]);
+
+  // 깊이 있는 뷰 진입 시 히스토리 push
+  useEffect(() => {
+    if (selectedPath) history.pushState({ view: 'route-detail' }, '');
+  }, [selectedPath]);
+  useEffect(() => {
+    if (routePaths.length > 0) history.pushState({ view: 'route-list' }, '');
+  }, [routePaths.length]);
+  useEffect(() => {
+    if (selectedStation) history.pushState({ view: 'station' }, '');
+  }, [selectedStation]);
+
+  // popstate: 브라우저 뒤로가기 → 앱 내부 이동
+  useEffect(() => {
+    const onPopState = () => {
+      if (selectedPathRef2.current) {
+        setSelectedPath(null);
+        selectedPathRef.current = null;
+        setSheetSnap(1);
+      } else if (routePathsRef.current.length > 0) {
+        setRoutePaths([]);
+        setBoardingTimes([]);
+        setSelectedBoardingTime(null);
+        setSegmentBoardingTimes([]);
+        setSheetSnap(0);
+      } else if (selectedStationRef2.current) {
+        setSelectedStation(null);
+        setArrivals([]);
+        setArrivalError(null);
+        setSheetSnap(0);
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   // ── 데이터 페칭 ──────────────────────────────────
   useEffect(() => {
     if (!position) return;
