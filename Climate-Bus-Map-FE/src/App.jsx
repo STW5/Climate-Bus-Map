@@ -11,7 +11,6 @@ import BottomTabBar from './components/BottomTabBar';
 import FloatingSearchBar from './components/FloatingSearchBar';
 import LoginModal from './components/LoginModal';
 import SavedRoutesPanel from './components/SavedRoutesPanel';
-import StatsPanel from './components/StatsPanel';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useGeolocation } from './hooks/useGeolocation';
 import { fetchNearbyStations, fetchArrivals, fetchNearbyClimateRoutes, fetchBoardingTime, fetchSegmentBoardingTimes } from './api/busApi';
@@ -19,7 +18,7 @@ import { searchTransitRoute, loadLaneForPath } from './api/odsayApi';
 import { getWalkingRoute } from './api/tmapApi';
 import { getSubPathClimateFlags } from './utils/climateChecker';
 import { getFavorites } from './utils/favorites';
-import { getFavoritesForUser, removeFavoriteForUser, migrateLocalToServer } from './api/favoritesApi';
+import { getFavoritesForUser, migrateLocalToServer } from './api/favoritesApi';
 import './App.css';
 
 // 바텀 시트 스냅 포인트 (peek / half / full)
@@ -343,14 +342,6 @@ function AppInner() {
           favorites={favorites}
           onStationSelect={handleStationSelect}
           onFavoriteChange={refreshFavorites}
-          onLoginRequest={() => setLoginOpen(true)}
-        />
-      );
-    }
-    if (activeTab === 'stats') {
-      return (
-        <StatsPanel
-          isLoggedIn={isLoggedIn}
           onLoginRequest={() => setLoginOpen(true)}
         />
       );

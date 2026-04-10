@@ -27,7 +27,7 @@ export default function SavedRoutesPanel({ onRouteRestore }) {
     try {
       const detail = await fetchSavedRouteDetail(id);
       onRouteRestore?.(detail);
-    } catch (e) {
+    } catch {
       alert('경로를 불러오지 못했습니다.');
     }
   };

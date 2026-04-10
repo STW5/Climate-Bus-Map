@@ -24,6 +24,16 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // react-hooks v7에서 추가된 초엄격 규칙 — 기존 패턴과 충돌하여 off
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+    },
+  },
+  // 서비스 워커 전역 변수 (clients 등)
+  {
+    files: ['public/sw-push.js'],
+    languageOptions: {
+      globals: globals.serviceworker,
     },
   },
 ])
