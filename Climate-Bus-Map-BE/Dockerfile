@@ -13,4 +13,6 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx512m", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx512m", \
+  "-Xlog:gc*:file=/app/gc.log:time,uptime:filecount=3,filesize=5m", \
+  "-jar", "app.jar"]
